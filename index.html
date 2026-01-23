@@ -264,6 +264,9 @@
 </div>
 
 <script>
+    
+    
+
 let currentUser = null,
     users = [],
     dishes = [],
@@ -293,28 +296,28 @@ function init() {
         name: 'John Manager',
         email: 'john@royalkitchen.com',
         role: 'manager',
-        isActive: true,
+        isActive: false, // Disabled by default
         permissions: {
-            addDish: true,
-            editDish: true,
-            deleteDish: false,
-            reserveTable: true,
-            viewTableOrders: true,
-            viewOrderHistory: true,
-            viewByName: true
+            addDish: false, // Disabled by default
+            editDish: false, // Disabled by default
+            deleteDish: false, // Disabled by default
+            reserveTable: false, // Disabled by default
+            viewTableOrders: false, // Disabled by default
+            viewOrderHistory: false, // Disabled by default
+            viewByName: false // Disabled by default
         }
     }, {
         id: '3',
         name: 'Sarah Waiter',
         email: 'sarah@royalkitchen.com',
         role: 'waiter',
-        isActive: true,
+        isActive: false, // Disabled by default
         permissions: {
             addDish: false,
             editDish: false,
             deleteDish: false,
-            reserveTable: true,
-            viewTableOrders: true,
+            reserveTable: false,
+            viewTableOrders: false,
             viewOrderHistory: false,
             viewByName: false
         }
@@ -323,13 +326,13 @@ function init() {
         name: 'Mike Chef',
         email: 'mike@royalkitchen.com',
         role: 'chef',
-        isActive: true,
+        isActive: false, // Disabled by default
         permissions: {
             addDish: false,
             editDish: false,
             deleteDish: false,
             reserveTable: false,
-            viewTableOrders: true,
+            viewTableOrders: false,
             viewOrderHistory: false,
             viewByName: false
         }
@@ -405,7 +408,7 @@ function closeSetupGuide() {
 function handleLogin() {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
-    const user = users.find(u => u.email === email);
+    const user = users.find(u => u.email === email && u.isActive === true); // Only active users can login
     
     if (user) {
         // In a real app, you should verify password
@@ -418,7 +421,7 @@ function handleLogin() {
         showView('dashboard');
         alert('✓ Login successful!');
     } else {
-        alert('✗ Invalid credentials');
+        alert('✗ Invalid credentials or user is disabled');
     }
 }
 
@@ -506,71 +509,63 @@ function saveUser() {
         phone: document.getElementById('userPhone').value,
         role: document.getElementById('userRole').value,
         password: document.getElementById('userPassword').value,
-        isActive: true,
-        permissions: {}
-    };
-    
-    // Set default permissions based on role
-    if (user.role === 'manager') {
-        user.permissions = {
-            addDish: true,
-            editDish: true,
-            deleteDish: false,
-            reserveTable: true,
-            viewTableOrders: true,
-            viewOrderHistory: true,
-            viewByName: true
-        };
-    } else if (user.role === 'waiter') {
-        user.permissions = {
-            addDish: false,
-            editDish: false,
-            deleteDish: false,
-            reserveTable: true,
-            viewTableOrders: true,
-            viewOrderHistory: false,
-            viewByName: false
-        };
-    } else if (user.role === 'chef') {
-        user.permissions = {
+        isActive: false, // Disabled by default
+        permissions: {
             addDish: false,
             editDish: false,
             deleteDish: false,
             reserveTable: false,
-            viewTableOrders: true,
+            viewTableOrders: false,
             viewOrderHistory: false,
             viewByName: false
-        };
-    }
+        }
+    };
     
     users.push(user);
     closeModal();
     renderUsers();
     updateStats();
-    alert('User added successfully!');
+    alert('User added successfully! User is disabled by default. Enable and set permissions.');
 }
 
 function renderUsers() {
     let html = '';
     users.forEach(user => {
+        if (user.role === 'admin') return; // Hide admin from editing
+        
         html += `
             <div class="bg-white p-4 rounded-xl shadow">
-                <div class="flex justify-between items-center">
+                <div class="flex justify-between items-center mb-4">
                     <div>
                         <h3 class="font-bold">${user.name}</h3>
                         <p class="text-gray-600 text-sm">${user.email} • ${user.role.toUpperCase()}</p>
+                        <p class="text-gray-600 text-sm">${user.phone || 'No phone'}</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="toggleUser('${user.id}')" class="px-3 py-1 ${user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} rounded">
-                            ${user.isActive ? 'Active' : 'Inactive'}
+                            ${user.isActive ? 'Active' : 'Disabled'}
                         </button>
-                        ${currentUser.role === 'admin' ? `<button onclick="deleteUser('${user.id}')" class="px-3 py-1 bg-red-600 text-white rounded">Delete</button>` : ''}
+                        <button onclick="managePermissions('${user.id}')" class="px-3 py-1 bg-blue-600 text-white rounded">Permissions</button>
+                        <button onclick="deleteUser('${user.id}')" class="px-3 py-1 bg-red-600 text-white rounded">Delete</button>
                     </div>
                 </div>
+                ${user.isActive ? `
+                    <div class="border-t pt-3">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                            <div class="${user.permissions.addDish ? 'text-green-600' : 'text-gray-400'}">✓ Add Dish: ${user.permissions.addDish ? 'Yes' : 'No'}</div>
+                            <div class="${user.permissions.editDish ? 'text-green-600' : 'text-gray-400'}">✓ Edit Dish: ${user.permissions.editDish ? 'Yes' : 'No'}</div>
+                            <div class="${user.permissions.deleteDish ? 'text-green-600' : 'text-gray-400'}">✓ Delete Dish: ${user.permissions.deleteDish ? 'Yes' : 'No'}</div>
+                            <div class="${user.permissions.reserveTable ? 'text-green-600' : 'text-gray-400'}">✓ Reserve Table: ${user.permissions.reserveTable ? 'Yes' : 'No'}</div>
+                            <div class="${user.permissions.viewTableOrders ? 'text-green-600' : 'text-gray-400'}">✓ View Orders: ${user.permissions.viewTableOrders ? 'Yes' : 'No'}</div>
+                            <div class="${user.permissions.viewOrderHistory ? 'text-green-600' : 'text-gray-400'}">✓ View History: ${user.permissions.viewOrderHistory ? 'Yes' : 'No'}</div>
+                            <div class="${user.permissions.viewByName ? 'text-green-600' : 'text-gray-400'}">✓ View by Name: ${user.permissions.viewByName ? 'Yes' : 'No'}</div>
+                        </div>
+                    </div>
+                ` : ''}
             </div>
         `;
     });
-    document.getElementById('usersList').innerHTML = html;
+    document.getElementById('usersList').innerHTML = html || '<p class="text-gray-500 text-center py-8">No users found (Admin is hidden)</p>';
 }
 
 function toggleUser(id) {
@@ -578,6 +573,7 @@ function toggleUser(id) {
     if (user) {
         user.isActive = !user.isActive;
         renderUsers();
+        alert(`User ${user.name} is now ${user.isActive ? 'enabled' : 'disabled'}`);
     }
 }
 
@@ -586,6 +582,146 @@ function deleteUser(id) {
         users = users.filter(u => u.id !== id);
         renderUsers();
         updateStats();
+    }
+}
+
+function managePermissions(userId) {
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    
+    // Create permissions modal
+    let modalHTML = `
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <h3 class="text-2xl font-bold mb-6">Manage Permissions for ${user.name}</h3>
+                <div class="space-y-6">
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <p class="text-sm">User must be <strong>Active</strong> for permissions to work. Current status: <span class="${user.isActive ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}">${user.isActive ? 'ACTIVE' : 'DISABLED'}</span></p>
+                        <button onclick="toggleUser('${user.id}');closePermissionsModal();" class="mt-2 px-3 py-1 ${user.isActive ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'} rounded">
+                            ${user.isActive ? 'Disable User' : 'Enable User'}
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    `;
+    
+    // List all permissions with radio buttons
+    const permissions = [
+        { id: 'addDish', label: 'Add Dish', description: 'Can add new dishes to menu' },
+        { id: 'editDish', label: 'Edit Dish', description: 'Can edit existing dishes' },
+        { id: 'deleteDish', label: 'Delete Dish', description: 'Can delete dishes from menu' },
+        { id: 'reserveTable', label: 'Reserve Table', description: 'Can make table reservations' },
+        { id: 'viewTableOrders', label: 'View Table Orders', description: 'Can view current orders by table' },
+        { id: 'viewOrderHistory', label: 'View Order History', description: 'Can view order history' },
+        { id: 'viewByName', label: 'View by Name', description: 'Can view history by customer name' }
+    ];
+    
+    permissions.forEach(perm => {
+        const isEnabled = user.permissions[perm.id];
+        modalHTML += `
+            <div class="border rounded-lg p-4 ${isEnabled ? 'border-green-200 bg-green-50' : 'border-gray-200'}">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-bold">${perm.label}</h4>
+                    <div class="flex gap-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="${perm.id}" value="true" ${isEnabled ? 'checked' : ''} 
+                                   onchange="updateUserPermission('${user.id}', '${perm.id}', true)" 
+                                   class="mr-1" ${!user.isActive ? 'disabled' : ''}>
+                            <span class="text-sm ${!user.isActive ? 'text-gray-400' : 'text-green-600'}">Enable</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="${perm.id}" value="false" ${!isEnabled ? 'checked' : ''} 
+                                   onchange="updateUserPermission('${user.id}', '${perm.id}', false)" 
+                                   class="mr-1" ${!user.isActive ? 'disabled' : ''}>
+                            <span class="text-sm ${!user.isActive ? 'text-gray-400' : 'text-red-600'}">Disable</span>
+                        </label>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600">${perm.description}</p>
+            </div>
+        `;
+    });
+    
+    modalHTML += `
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4 border-t">
+                        <button onclick="closePermissionsModal()" class="flex-1 bg-gray-300 py-2 rounded-lg">Close</button>
+                        <button onclick="applyPresetPermissions('${user.id}', 'manager')" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg" ${!user.isActive ? 'disabled' : ''}>Manager Preset</button>
+                        <button onclick="applyPresetPermissions('${user.id}', 'waiter')" class="px-4 py-2 bg-green-100 text-green-700 rounded-lg" ${!user.isActive ? 'disabled' : ''}>Waiter Preset</button>
+                        <button onclick="applyPresetPermissions('${user.id}', 'chef')" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg" ${!user.isActive ? 'disabled' : ''}>Chef Preset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove any existing permissions modal
+    const existingModal = document.getElementById('permissionsModal');
+    if (existingModal) existingModal.remove();
+    
+    // Add new modal
+    const modalDiv = document.createElement('div');
+    modalDiv.id = 'permissionsModal';
+    modalDiv.innerHTML = modalHTML;
+    document.body.appendChild(modalDiv);
+}
+
+function closePermissionsModal() {
+    const modal = document.getElementById('permissionsModal');
+    if (modal) modal.remove();
+    renderUsers();
+}
+
+function updateUserPermission(userId, permission, value) {
+    const user = users.find(u => u.id === userId);
+    if (user && user.isActive) {
+        user.permissions[permission] = value;
+        renderUsers();
+    }
+}
+
+function applyPresetPermissions(userId, role) {
+    const user = users.find(u => u.id === userId);
+    if (!user || !user.isActive) {
+        alert('User must be active to apply permissions');
+        return;
+    }
+    
+    const presets = {
+        manager: {
+            addDish: true,
+            editDish: true,
+            deleteDish: false,
+            reserveTable: true,
+            viewTableOrders: true,
+            viewOrderHistory: true,
+            viewByName: true
+        },
+        waiter: {
+            addDish: false,
+            editDish: false,
+            deleteDish: false,
+            reserveTable: true,
+            viewTableOrders: true,
+            viewOrderHistory: false,
+            viewByName: false
+        },
+        chef: {
+            addDish: false,
+            editDish: false,
+            deleteDish: false,
+            reserveTable: false,
+            viewTableOrders: true,
+            viewOrderHistory: false,
+            viewByName: false
+        }
+    };
+    
+    if (presets[role]) {
+        user.permissions = { ...presets[role] };
+        alert(`Applied ${role} permissions preset`);
+        closePermissionsModal();
     }
 }
 
@@ -618,258 +754,9 @@ function renderDishes() {
     document.getElementById('dishesList').innerHTML = html;
 }
 
-function saveDish() {
-    const id = document.getElementById('dishId').value || 'd' + Date.now();
-    const dish = {
-        id: id,
-        name: document.getElementById('dishName').value,
-        category: document.getElementById('dishCategory').value,
-        price: parseFloat(document.getElementById('dishPrice').value),
-        description: document.getElementById('dishDesc').value,
-        imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300', // Default image
-        isActive: true
-    };
+function 
+
+
     
-    if (id.startsWith('d')) {
-        const index = dishes.findIndex(d => d.id === id);
-        if (index !== -1) {
-            dishes[index] = dish;
-        }
-    } else {
-        dishes.push(dish);
-    }
-    
-    closeModal();
-    renderDishes();
-    updateStats();
-    alert('Dish saved successfully!');
-}
-
-function editDish(id) {
-    const dish = dishes.find(d => d.id === id);
-    if (dish) {
-        document.getElementById('dishId').value = dish.id;
-        document.getElementById('dishName').value = dish.name;
-        document.getElementById('dishCategory').value = dish.category;
-        document.getElementById('dishPrice').value = dish.price;
-        document.getElementById('dishDesc').value = dish.description;
-        document.getElementById('dishTitle').textContent = 'Edit';
-        showModal('dish');
-    }
-}
-
-function deleteDish(id) {
-    if (confirm('Are you sure you want to delete this dish?')) {
-        const dish = dishes.find(d => d.id === id);
-        if (dish) dish.isActive = false;
-        renderDishes();
-        updateStats();
-    }
-}
-
-function saveReservation() {
-    const id = 'r' + Date.now();
-    const reservation = {
-        id: id,
-        tableNumber: parseInt(document.getElementById('resTable').value),
-        customerName: document.getElementById('resName').value,
-        customerPhone: document.getElementById('resPhone').value,
-        date: document.getElementById('resDate').value,
-        time: document.getElementById('resTime').value,
-        guestCount: parseInt(document.getElementById('resGuests').value),
-        status: 'confirmed',
-        createdAt: new Date().toISOString()
-    };
-    
-    // Mark table as reserved
-    const table = tables.find(t => t.number === reservation.tableNumber);
-    if (table) table.status = 'reserved';
-    
-    reservations.push(reservation);
-    closeModal();
-    renderReservations();
-    alert('Reservation created successfully!');
-}
-
-function renderReservations() {
-    let html = '';
-    reservations.forEach(res => {
-        html += `
-            <div class="bg-white p-4 rounded-xl shadow">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold">${res.customerName}</h3>
-                        <p class="text-gray-600 text-sm">Table ${res.tableNumber} • ${res.guestCount} guests</p>
-                        <p class="text-gray-600 text-sm">${res.date} at ${res.time}</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <span class="px-3 py-1 ${res.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'} rounded">
-                            ${res.status}
-                        </span>
-                        <button onclick="cancelReservation('${res.id}')" class="px-3 py-1 bg-red-100 text-red-700 rounded">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    document.getElementById('reservationsList').innerHTML = html;
-}
-
-function cancelReservation(id) {
-    if (confirm('Are you sure you want to cancel this reservation?')) {
-        const reservation = reservations.find(r => r.id === id);
-        if (reservation) {
-            reservation.status = 'cancelled';
-            // Free the table
-            const table = tables.find(t => t.number === reservation.tableNumber);
-            if (table) table.status = 'free';
-        }
-        renderReservations();
-    }
-}
-
-function renderOrders() {
-    const search = document.getElementById('orderSearch')?.value.toLowerCase() || '';
-    let html = '';
-    
-    orders.forEach(order => {
-        if (search && !order.tableNumber.toString().includes(search) && 
-            !order.customerName.toLowerCase().includes(search)) return;
-            
-        html += `
-            <div class="bg-white p-4 rounded-xl shadow">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h3 class="font-bold">Table ${order.tableNumber} • ${order.customerName}</h3>
-                        <p class="text-gray-600 text-sm">${order.orderNumber}</p>
-                    </div>
-                    <span class="px-3 py-1 ${order.status === 'completed' ? 'bg-green-100 text-green-700' : order.status === 'preparing' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'} rounded">
-                        ${order.status}
-                    </span>
-                </div>
-                <div class="border-t pt-4">
-                    ${order.items.map(item => `
-                        <div class="flex justify-between mb-2">
-                            <span>${item.name} × ${item.quantity}</span>
-                            <span>₹${item.price * item.quantity}</span>
-                        </div>
-                    `).join('')}
-                    <div class="flex justify-between font-bold border-t pt-2 mt-2">
-                        <span>Total</span>
-                        <span>₹${order.total}</span>
-                    </div>
-                </div>
-                <div class="flex gap-2 mt-4">
-                    ${order.status === 'preparing' ? `<button onclick="updateOrderStatus('${order.id}', 'completed')" class="px-3 py-1 bg-green-600 text-white rounded">Mark Completed</button>` : ''}
-                    <button onclick="viewOrderDetails('${order.id}')" class="px-3 py-1 bg-blue-600 text-white rounded">View Details</button>
-                </div>
-            </div>
-        `;
-    });
-    document.getElementById('ordersList').innerHTML = html;
-}
-
-function updateOrderStatus(id, status) {
-    const order = orders.find(o => o.id === id);
-    if (order) {
-        order.status = status;
-        renderOrders();
-    }
-}
-
-function viewOrderDetails(id) {
-    const order = orders.find(o => o.id === id);
-    if (order) {
-        alert(`Order Details:\n\nOrder: ${order.orderNumber}\nTable: ${order.tableNumber}\nCustomer: ${order.customerName}\nPhone: ${order.customerPhone}\nStatus: ${order.status}\nTotal: ₹${order.total}`);
-    }
-}
-
-function renderHistory() {
-    const search = document.getElementById('historySearch')?.value.toLowerCase() || '';
-    let html = '';
-    
-    if (historyFilter === 'table') {
-        document.getElementById('btnTable').classList.add('bg-blue-600', 'text-white');
-        document.getElementById('btnTable').classList.remove('bg-gray-300');
-        document.getElementById('btnName').classList.remove('bg-blue-600', 'text-white');
-        document.getElementById('btnName').classList.add('bg-gray-300');
-        
-        // Group orders by table
-        const tableGroups = {};
-        orders.forEach(order => {
-            if (search && !order.tableNumber.toString().includes(search)) return;
-            
-            if (!tableGroups[order.tableNumber]) {
-                tableGroups[order.tableNumber] = [];
-            }
-            tableGroups[order.tableNumber].push(order);
-        });
-        
-        for (const [tableNumber, tableOrders] of Object.entries(tableGroups)) {
-            const total = tableOrders.reduce((sum, o) => sum + o.total, 0);
-            html += `
-                <div class="bg-white p-4 rounded-xl shadow">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-lg">Table ${tableNumber}</h3>
-                        <span class="font-bold">₹${total}</span>
-                    </div>
-                    ${tableOrders.map(order => `
-                        <div class="border-l-2 border-blue-500 pl-3 mb-3">
-                            <div class="flex justify-between">
-                                <span class="font-medium">${order.orderNumber}</span>
-                                <span>₹${order.total}</span>
-                            </div>
-                            <p class="text-gray-600 text-sm">${new Date(order.createdAt).toLocaleDateString()} • ${order.customerName}</p>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-    } else {
-        document.getElementById('btnName').classList.add('bg-blue-600', 'text-white');
-        document.getElementById('btnName').classList.remove('bg-gray-300');
-        document.getElementById('btnTable').classList.remove('bg-blue-600', 'text-white');
-        document.getElementById('btnTable').classList.add('bg-gray-300');
-        
-        // Group orders by customer name
-        const nameGroups = {};
-        orders.forEach(order => {
-            if (search && !order.customerName.toLowerCase().includes(search)) return;
-            
-            if (!nameGroups[order.customerName]) {
-                nameGroups[order.customerName] = [];
-            }
-            nameGroups[order.customerName].push(order);
-        });
-        
-        for (const [customerName, customerOrders] of Object.entries(nameGroups)) {
-            const total = customerOrders.reduce((sum, o) => sum + o.total, 0);
-            html += `
-                <div class="bg-white p-4 rounded-xl shadow">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-lg">${customerName}</h3>
-                        <span class="font-bold">₹${total}</span>
-                    </div>
-                    ${customerOrders.map(order => `
-                        <div class="border-l-2 border-green-500 pl-3 mb-3">
-                            <div class="flex justify-between">
-                                <span class="font-medium">Table ${order.tableNumber}</span>
-                                <span>₹${order.total}</span>
-                            </div>
-                            <p class="text-gray-600 text-sm">${new Date(order.createdAt).toLocaleDateString()} • ${order.orderNumber}</p>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-    }
-    
-    document.getElementById('historyList').innerHTML = html || '<p class="text-gray-500 text-center py-8">No orders found</p>';
-}
-
-// Initialize the application when page loads
-window.onload = function() {
-    init();
-};
-
 </script>
+
