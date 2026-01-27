@@ -3,121 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Royal Kitchen - Complete System</title>
+    <title>The Royal Kitchen - Restaurant Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Add Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+    .image-thumbnail {
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+    }
+
+    .image-thumbnail:hover {
+        transform: scale(1.05);
+        border-color: #3b82f6;
+    }
+
+    .image-thumbnail.selected {
+        border-color: #10b981;
+        border-width: 3px;
+    }
+
+    .default-image {
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+    }
+
+    .default-image:hover {
+        border-color: #f59e0b;
+    }
+
+    .default-image.selected {
+        border-color: #f59e0b;
+        border-width: 3px;
+    }
+    </style>
 </head>
 <body class="bg-gray-50">
 
-<!-- Setup Guide Modal -->
-<div id="setupGuide" class="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl max-w-4xl max-h-[90vh] overflow-y-auto p-8">
-        <h2 class="text-3xl font-bold mb-6 text-red-600">🚀 Setup Instructions</h2>
-        
-        <div class="space-y-6">
-            <div class="bg-blue-50 p-4 rounded-lg">
-                <h3 class="font-bold text-lg mb-2">📦 This is a DEMO version with full features</h3>
-                <p class="text-sm">All data is stored in browser memory. For production:</p>
-            </div>
-
-            <div class="border-l-4 border-green-500 pl-4">
-                <h3 class="font-bold mb-2">1️⃣ Supabase Setup (Database)</h3>
-                <ol class="text-sm space-y-2 list-decimal list-inside">
-                    <li>Create account at <a href="https://supabase.com" target="_blank" class="text-blue-600 underline">supabase.com</a></li>
-                    <li>Create new project</li>
-                    <li>Get URL & Key from Settings → API</li>
-                    <li>Run SQL in SQL Editor (provided in code comments)</li>
-                </ol>
-            </div>
-
-            <div class="border-l-4 border-orange-500 pl-4">
-                <h3 class="font-bold mb-2">2️⃣ Firebase Setup (Image Storage)</h3>
-                <ol class="text-sm space-y-2 list-decimal list-inside">
-                    <li>Create project at <a href="https://console.firebase.google.com" target="_blank" class="text-blue-600 underline">Firebase Console</a></li>
-                    <li>Enable Storage</li>
-                    <li>Get config from Project Settings</li>
-                    <li>Update storage rules (provided in code)</li>
-                </ol>
-            </div>
-
-            <div class="bg-yellow-50 p-4 rounded-lg">
-                <h3 class="font-bold mb-2">✨ Features Included:</h3>
-                <div class="grid grid-cols-2 gap-2 text-sm">
-                    <div>✅ User Management</div>
-                    <div>✅ Role-based Access</div>
-                    <div>✅ Add/Edit/Delete Dishes</div>
-                    <div>✅ Image Upload</div>
-                    <div>✅ Table Reservations</div>
-                    <div>✅ Order Management</div>
-                    <div>✅ Table-wise History</div>
-                    <div>✅ Name-wise History</div>
-                    <div>✅ 7 Custom Permissions</div>
-                    <div>✅ Responsive Design</div>
+<!-- Customer Menu View (Default) -->
+<div id="customerView">
+    <!-- Top Navigation Bar -->
+    <nav class="bg-gradient-to-r from-red-700 to-amber-700 text-white py-4 shadow-xl sticky top-0 z-50">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="w-10 h-10 mr-3 bg-white rounded-full flex items-center justify-center">
+                    <i class="fas fa-utensils text-red-600 text-xl"></i>
                 </div>
+                <h1 class="text-2xl font-bold">The Royal Kitchen</h1>
             </div>
+            
+            <!-- Customer Login -->
+            <div class="flex items-center gap-4">
+                <!-- Staff Login Button -->
+                <button onclick="showStaffLogin()" class="p-2 hover:bg-white/20 rounded-full" id="staffLoginBtn">
+                    <i class="fas fa-user-tie text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
 
-            <div class="bg-gray-100 p-4 rounded-lg">
-                <h3 class="font-bold mb-2">🔑 Demo Credentials:</h3>
-                <div class="font-mono text-sm space-y-1">
-                    <div><strong>Admin:</strong> admin@royalkitchen.com / admin123</div>
-                    <div><strong>Manager:</strong> john@royalkitchen.com / manager123</div>
-                    <div><strong>Waiter:</strong> sarah@royalkitchen.com / waiter123</div>
-                    <div><strong>Chef:</strong> mike@royalkitchen.com / chef123</div>
+    <!-- Menu Section -->
+    <section class="py-8" id="menuSection">
+        <div class="container mx-auto px-4">
+            <!-- Menu Items Grid -->
+            <div id="customerMenuList" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+        </div>
+    </section>
+
+    <!-- Reservation Modal for Customers -->
+    <div id="reservationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl p-8 w-full max-w-md">
+            <h3 class="text-2xl font-bold mb-6">Book a Table</h3>
+            <div class="space-y-4">
+                <input id="custName" type="text" placeholder="Your Name" class="w-full px-4 py-2 border rounded-lg">
+                <input id="custEmail" type="email" placeholder="Email Address" class="w-full px-4 py-2 border rounded-lg">
+                <input id="custPhone" type="tel" placeholder="Phone Number" class="w-full px-4 py-2 border rounded-lg">
+                <input id="custDate" type="date" class="w-full px-4 py-2 border rounded-lg">
+                <input id="custTime" type="time" class="w-full px-4 py-2 border rounded-lg">
+                <input id="custGuests" type="number" placeholder="Number of Guests" value="2" min="1" max="12" class="w-full px-4 py-2 border rounded-lg">
+                <select id="custTable" class="w-full px-4 py-2 border rounded-lg"></select>
+                <div class="flex gap-3">
+                    <button onclick="submitCustomerReservation()" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700">
+                        Book Now
+                    </button>
+                    <button onclick="closeCustomerReservationModal()" class="flex-1 bg-gray-300 py-2 rounded-lg">
+                        Cancel
+                    </button>
                 </div>
             </div>
         </div>
-
-        <button onclick="closeSetupGuide()" class="mt-6 w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 font-bold">
-            Start Using Demo →
-        </button>
     </div>
-</div>
 
-<!-- Login Screen -->
-<div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-amber-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
-        <div class="text-center mb-8">
-            <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-red-600 to-amber-600 rounded-full flex items-center justify-center">
-                <i class="fas fa-utensils text-white text-3xl"></i>
+    <!-- Staff Login Modal -->
+    <div id="staffLoginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-red-600 to-amber-600 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user-tie text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800">Staff Login</h3>
+                <p class="text-gray-600 mt-2">Restaurant Management System</p>
             </div>
-            <h1 class="text-3xl font-bold text-gray-800">The Royal Kitchen</h1>
-            <p class="text-gray-600 mt-2">Restaurant Management System</p>
-        </div>
 
-        <div class="space-y-4">
-            <input type="email" id="loginEmail" value="admin@royalkitchen.com" placeholder="Email"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
-            <input type="password" id="loginPassword" value="admin123" placeholder="Password"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
-            <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 rounded-lg font-medium hover:from-red-700 hover:to-amber-700">
-                Login
-            </button>
-            <button onclick="document.getElementById('setupGuide').classList.remove('hidden')" class="w-full text-sm text-blue-600 hover:underline">
-                View Setup Guide
-            </button>
+            <div class="space-y-4">
+                <input type="email" id="staffEmail" placeholder="Staff Email" class="w-full px-4 py-2 border rounded-lg">
+                <input type="password" id="staffPassword" placeholder="Password" class="w-full px-4 py-2 border rounded-lg">
+                <button onclick="handleStaffLogin()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 rounded-lg font-medium hover:from-red-700 hover:to-amber-700">
+                    Login
+                </button>
+                
+                <button onclick="closeStaffLoginModal()" class="w-full text-sm text-gray-600 hover:underline">
+                    Back to Menu
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Main Dashboard (hidden initially) -->
-<div id="mainDashboard" class="hidden min-h-screen">
+<!-- Staff Dashboard (Hidden Initially) -->
+<div id="staffDashboard" class="hidden min-h-screen">
     <header class="bg-gradient-to-r from-red-700 to-amber-700 text-white py-4 shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold"><i class="fas fa-utensils mr-2"></i>The Royal Kitchen</h1>
-                <p class="text-sm text-red-100"><span id="userName"></span> • <span id="userRole"></span></p>
+            <div class="flex items-center">
+                <div class="w-10 h-10 mr-3 bg-white rounded-full flex items-center justify-center">
+                    <i class="fas fa-utensils text-red-600 text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">The Royal Kitchen</h1>
+                    <p class="text-sm text-red-100"><span id="staffUserName"></span> • <span id="staffUserRole"></span></p>
+                </div>
             </div>
-            <button onclick="handleLogout()" class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg">
-                <i class="fas fa-sign-out-alt mr-2"></i>Logout
-            </button>
+            <div class="flex items-center gap-4">
+                <div class="text-sm">
+                    <i class="fas fa-user-circle mr-1"></i>
+                    <span id="staffUserEmail"></span>
+                </div>
+                <button onclick="handleLogout()" class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </button>
+            </div>
         </div>
     </header>
 
     <nav class="bg-white shadow sticky top-16 z-30">
-        <div class="container mx-auto px-4 py-3 flex gap-2 overflow-x-auto" id="navMenu"></div>
+        <div class="container mx-auto px-4 py-3 flex gap-2 overflow-x-auto" id="staffNavMenu"></div>
     </nav>
 
     <main class="container mx-auto px-4 py-8">
+        <!-- Dashboard View -->
         <div id="viewDashboard" class="view">
             <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -146,21 +184,42 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Quick Stats (Only visible with revenue permission) -->
+            <div id="revenueStats" class="mt-8 hidden">
+                <h3 class="text-xl font-bold mb-4">Revenue Statistics</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <p class="text-gray-600 text-sm">Today's Revenue</p>
+                        <p class="text-2xl font-bold">₹<span id="todayRevenue">0</span></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <p class="text-gray-600 text-sm">Weekly Revenue</p>
+                        <p class="text-2xl font-bold">₹<span id="weeklyRevenue">0</span></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <p class="text-gray-600 text-sm">Monthly Revenue</p>
+                        <p class="text-2xl font-bold">₹<span id="monthlyRevenue">0</span></p>
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <!-- Users View -->
         <div id="viewUsers" class="view hidden">
             <div class="flex justify-between mb-6">
-                <h2 class="text-2xl font-bold">Users</h2>
-                <button onclick="showModal('user')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    <i class="fas fa-plus mr-2"></i>Add User
+                <h2 class="text-2xl font-bold">Staff Management</h2>
+                <button onclick="showModal('user')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    <i class="fas fa-plus mr-2"></i>Add Staff
                 </button>
             </div>
             <div id="usersList" class="space-y-4"></div>
         </div>
 
+        <!-- Dishes View -->
         <div id="viewDishes" class="view hidden">
             <div class="flex justify-between mb-6">
-                <h2 class="text-2xl font-bold">Dishes</h2>
+                <h2 class="text-2xl font-bold">Menu Management</h2>
                 <button onclick="showModal('dish')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
                     <i class="fas fa-plus mr-2"></i>Add Dish
                 </button>
@@ -168,6 +227,7 @@
             <div id="dishesList" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </div>
 
+        <!-- Reservations View -->
         <div id="viewReservations" class="view hidden">
             <div class="flex justify-between mb-6">
                 <h2 class="text-2xl font-bold">Reservations</h2>
@@ -178,6 +238,7 @@
             <div id="reservationsList" class="space-y-4"></div>
         </div>
 
+        <!-- Orders View -->
         <div id="viewOrders" class="view hidden">
             <div class="flex justify-between mb-6">
                 <h2 class="text-2xl font-bold">Orders - Table View</h2>
@@ -186,6 +247,7 @@
             <div id="ordersList" class="space-y-4"></div>
         </div>
 
+        <!-- History View -->
         <div id="viewHistory" class="view hidden">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold mb-4">Order History</h2>
@@ -200,563 +262,131 @@
     </main>
 </div>
 
-<!-- Modals -->
+<!-- Staff Management Modals -->
 <div id="modalUser" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-xl p-8 w-full max-w-md">
-        <h3 class="text-2xl font-bold mb-6">Add User</h3>
+        <h3 class="text-2xl font-bold mb-6">Add Staff Member</h3>
         <div class="space-y-4">
-            <input id="userName" type="text" placeholder="Name" class="w-full px-4 py-2 border rounded-lg">
-            <input id="userEmail" type="email" placeholder="Email" class="w-full px-4 py-2 border rounded-lg">
-            <input id="userPhone" type="tel" placeholder="Phone" class="w-full px-4 py-2 border rounded-lg">
-            <select id="userRole" class="w-full px-4 py-2 border rounded-lg">
-                <option value="waiter">Waiter</option>
-                <option value="chef">Chef</option>
-                <option value="manager">Manager</option>
-            </select>
-            <input id="userPassword" type="password" placeholder="Password" class="w-full px-4 py-2 border rounded-lg">
+            <input id="staffName" type="text" placeholder="Full Name" class="w-full px-4 py-2 border rounded-lg">
+            <input id="staffEmailInput" type="email" placeholder="Email" class="w-full px-4 py-2 border rounded-lg">
+            
+            <!-- Role Selection with Radio Buttons -->
+            <div class="space-y-2">
+                <p class="font-medium">Select Role:</p>
+                <div class="flex flex-wrap gap-4">
+                    <label class="flex items-center">
+                        <input type="radio" name="userRole" value="manager" class="mr-2" checked>
+                        <span>Manager</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="userRole" value="chef" class="mr-2">
+                        <span>Chef</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="userRole" value="waiter" class="mr-2">
+                        <span>Waiter</span>
+                    </label>
+                </div>
+            </div>
+            
+            <input id="staffPasswordInput" type="password" placeholder="Password" class="w-full px-4 py-2 border rounded-lg">
             <div class="flex gap-3">
-                <button onclick="saveUser()" class="flex-1 bg-blue-600 text-white py-2 rounded-lg">Save</button>
+                <button onclick="saveUser()" class="flex-1 bg-blue-600 text-white py-2 rounded-lg">Add Staff</button>
                 <button onclick="closeModal()" class="flex-1 bg-gray-300 py-2 rounded-lg">Cancel</button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="modalDish" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl p-8 w-full max-w-md">
-        <h3 class="text-2xl font-bold mb-6"><span id="dishTitle">Add</span> Dish</h3>
-        <div class="space-y-4">
-            <input type="hidden" id="dishId">
-            <input id="dishName" type="text" placeholder="Dish Name" class="w-full px-4 py-2 border rounded-lg">
-            <select id="dishCategory" class="w-full px-4 py-2 border rounded-lg">
-                <option value="chinese">Chinese</option>
-                <option value="fastfood">Fast Food</option>
-                <option value="drinks">Drinks</option>
-                <option value="soups">Soups</option>
-            </select>
-            <input id="dishPrice" type="number" placeholder="Price" class="w-full px-4 py-2 border rounded-lg">
-            <textarea id="dishDesc" placeholder="Description" rows="2" class="w-full px-4 py-2 border rounded-lg"></textarea>
-            <input id="dishImage" type="file" accept="image/*" class="w-full px-4 py-2 border rounded-lg">
-            <div class="flex gap-3">
-                <button onclick="saveDish()" class="flex-1 bg-green-600 text-white py-2 rounded-lg">Save</button>
-                <button onclick="closeModal()" class="flex-1 bg-gray-300 py-2 rounded-lg">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="modalReservation" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl p-8 w-full max-w-md">
-        <h3 class="text-2xl font-bold mb-6">New Reservation</h3>
-        <div class="space-y-4">
-            <input id="resName" type="text" placeholder="Customer Name" class="w-full px-4 py-2 border rounded-lg">
-            <input id="resPhone" type="tel" placeholder="Phone" class="w-full px-4 py-2 border rounded-lg">
-            <input id="resDate" type="date" class="w-full px-4 py-2 border rounded-lg">
-            <input id="resTime" type="time" class="w-full px-4 py-2 border rounded-lg">
-            <input id="resGuests" type="number" placeholder="Guests" value="2" class="w-full px-4 py-2 border rounded-lg">
-            <select id="resTable" class="w-full px-4 py-2 border rounded-lg"></select>
-            <div class="flex gap-3">
-                <button onclick="saveReservation()" class="flex-1 bg-purple-600 text-white py-2 rounded-lg">Save</button>
-                <button onclick="closeModal()" class="flex-1 bg-gray-300 py-2 rounded-lg">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    
-    
-
-let currentUser = null,
-    users = [],
-    dishes = [],
-    orders = [],
-    reservations = [],
-    tables = [],
-    historyFilter = 'table';
-
-function init() {
-    users = [{
-        id: '1',
-        name: 'Admin',
-        email: 'admin@royalkitchen.com',
-        role: 'admin',
-        isActive: true,
-        permissions: {
-            addDish: true,
-            editDish: true,
-            deleteDish: true,
-            reserveTable: true,
-            viewTableOrders: true,
-            viewOrderHistory: true,
-            viewByName: true
-        }
-    }, {
-        id: '2',
-        name: 'John Manager',
-        email: 'john@royalkitchen.com',
-        role: 'manager',
-        isActive: false, // Disabled by default
-        permissions: {
-            addDish: false, // Disabled by default
-            editDish: false, // Disabled by default
-            deleteDish: false, // Disabled by default
-            reserveTable: false, // Disabled by default
-            viewTableOrders: false, // Disabled by default
-            viewOrderHistory: false, // Disabled by default
-            viewByName: false // Disabled by default
-        }
-    }, {
-        id: '3',
-        name: 'Sarah Waiter',
-        email: 'sarah@royalkitchen.com',
-        role: 'waiter',
-        isActive: false, // Disabled by default
-        permissions: {
-            addDish: false,
-            editDish: false,
-            deleteDish: false,
-            reserveTable: false,
-            viewTableOrders: false,
-            viewOrderHistory: false,
-            viewByName: false
-        }
-    }, {
-        id: '4',
-        name: 'Mike Chef',
-        email: 'mike@royalkitchen.com',
-        role: 'chef',
-        isActive: false, // Disabled by default
-        permissions: {
-            addDish: false,
-            editDish: false,
-            deleteDish: false,
-            reserveTable: false,
-            viewTableOrders: false,
-            viewOrderHistory: false,
-            viewByName: false
-        }
-    }];
-    
-    dishes = [{
-        id: 'd1',
-        name: 'Kung Pao Chicken',
-        category: 'chinese',
-        price: 320,
-        description: 'Spicy stir-fried chicken',
-        imageUrl: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300',
-        isActive: true
-    }, {
-        id: 'd2',
-        name: 'Dragon Burger',
-        category: 'fastfood',
-        price: 220,
-        description: 'Special chicken burger',
-        imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300',
-        isActive: true
-    }, {
-        id: 'd3',
-        name: 'Mango Lassi',
-        category: 'drinks',
-        price: 100,
-        description: 'Sweet mango yogurt',
-        imageUrl: 'https://images.unsplash.com/photo-1629367494173-c78a56567877?w=300',
-        isActive: true
-    }];
-    
-    orders = [{
-        id: 'o1',
-        orderNumber: 'ORD-001',
-        tableNumber: 3,
-        customerName: 'John Doe',
-        customerPhone: '+919876543210',
-        items: [{
-            name: 'Kung Pao Chicken',
-            price: 320,
-            quantity: 2
-        }],
-        total: 640,
-        status: 'preparing',
-        createdAt: new Date().toISOString()
-    }];
-    
-    tables = Array.from({length: 15}, (_, i) => ({
-        id: `t${i+1}`,
-        number: i + 1,
-        capacity: i < 5 ? 2 : i < 10 ? 4 : 6,
-        status: 'free'
-    }));
-    
-    reservations = [{
-        id: 'r1',
-        tableNumber: 5,
-        customerName: 'Alice Brown',
-        customerPhone: '+919876543212',
-        date: '2024-01-25',
-        time: '19:00',
-        guestCount: 4,
-        status: 'confirmed'
-    }];
-    
-    updateStats();
-}
-
-function closeSetupGuide() {
-    document.getElementById('setupGuide').classList.add('hidden');
-}
-
-function handleLogin() {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    const user = users.find(u => u.email === email && u.isActive === true); // Only active users can login
-    
-    if (user) {
-        // In a real app, you should verify password
-        currentUser = user;
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('mainDashboard').classList.remove('hidden');
-        document.getElementById('userName').textContent = user.name;
-        document.getElementById('userRole').textContent = user.role.toUpperCase();
-        setupNav();
-        showView('dashboard');
-        alert('✓ Login successful!');
-    } else {
-        alert('✗ Invalid credentials or user is disabled');
-    }
-}
-
-function handleLogout() {
-    currentUser = null;
-    document.getElementById('mainDashboard').classList.add('hidden');
-    document.getElementById('loginScreen').classList.remove('hidden');
-}
-
-function hasPermission(p) {
-    return currentUser?.role === 'admin' || currentUser?.permissions?.[p];
-}
-
-function setupNav() {
-    let nav = '<button onclick="showView(\'dashboard\')" class="px-4 py-2 rounded-lg hover:bg-gray-100"><i class="fas fa-home mr-2"></i>Dashboard</button>';
-    
-    if (currentUser.role === 'admin') {
-        nav += '<button onclick="showView(\'users\')" class="px-4 py-2 rounded-lg hover:bg-gray-100"><i class="fas fa-users mr-2"></i>Users</button>';
-    }
-    
-    if (hasPermission('addDish')) {
-        nav += '<button onclick="showView(\'dishes\')" class="px-4 py-2 rounded-lg hover:bg-gray-100"><i class="fas fa-utensils mr-2"></i>Dishes</button>';
-    }
-    
-    if (hasPermission('reserveTable')) {
-        nav += '<button onclick="showView(\'reservations\')" class="px-4 py-2 rounded-lg hover:bg-gray-100"><i class="fas fa-calendar mr-2"></i>Reservations</button>';
-    }
-    
-    if (hasPermission('viewTableOrders')) {
-        nav += '<button onclick="showView(\'orders\')" class="px-4 py-2 rounded-lg hover:bg-gray-100"><i class="fas fa-clipboard-list mr-2"></i>Orders</button>';
-    }
-    
-    if (hasPermission('viewOrderHistory')) {
-        nav += '<button onclick="showView(\'history\')" class="px-4 py-2 rounded-lg hover:bg-gray-100"><i class="fas fa-history mr-2"></i>History</button>';
-    }
-    
-    document.getElementById('navMenu').innerHTML = nav;
-}
-
-function showView(v) {
-    document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
-    document.getElementById('view' + v.charAt(0).toUpperCase() + v.slice(1)).classList.remove('hidden');
-    
-    if (v === 'users') renderUsers();
-    if (v === 'dishes') renderDishes();
-    if (v === 'orders') renderOrders();
-    if (v === 'reservations') renderReservations();
-    if (v === 'history') renderHistory();
-}
-
-function updateStats() {
-    document.getElementById('statUsers').textContent = users.length;
-    document.getElementById('statDishes').textContent = dishes.filter(d => d.isActive).length;
-    document.getElementById('statOrders').textContent = orders.length;
-    document.getElementById('statRevenue').textContent = '₹' + orders.reduce((sum, o) => sum + o.total, 0);
-}
-
-function showModal(type) {
-    document.getElementById('modal' + type.charAt(0).toUpperCase() + type.slice(1)).classList.remove('hidden');
-    
-    if (type === 'reservation') {
-        let opts = '<option value="">Select Table</option>';
-        tables.forEach(t => {
-            opts += `<option value="${t.number}">Table ${t.number} (${t.capacity} seats)</option>`;
-        });
-        document.getElementById('resTable').innerHTML = opts;
+<!-- Permissions Modal -->
+<div id="modalPermissions" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <h3 class="text-2xl font-bold mb-6">Manage Permissions for <span id="permissionsUserName"></span></h3>
         
-        // Set default date to tomorrow
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        document.getElementById('resDate').value = tomorrow.toISOString().split('T')[0];
-    }
-}
-
-function closeModal() {
-    document.querySelectorAll('[id^="modal"]').forEach(el => el.classList.add('hidden'));
-}
-
-function saveUser() {
-    const id = 'u' + Date.now();
-    const user = {
-        id: id,
-        name: document.getElementById('userName').value,
-        email: document.getElementById('userEmail').value,
-        phone: document.getElementById('userPhone').value,
-        role: document.getElementById('userRole').value,
-        password: document.getElementById('userPassword').value,
-        isActive: false, // Disabled by default
-        permissions: {
-            addDish: false,
-            editDish: false,
-            deleteDish: false,
-            reserveTable: false,
-            viewTableOrders: false,
-            viewOrderHistory: false,
-            viewByName: false
-        }
-    };
-    
-    users.push(user);
-    closeModal();
-    renderUsers();
-    updateStats();
-    alert('User added successfully! User is disabled by default. Enable and set permissions.');
-}
-
-function renderUsers() {
-    let html = '';
-    users.forEach(user => {
-        if (user.role === 'admin') return; // Hide admin from editing
-        
-        html += `
-            <div class="bg-white p-4 rounded-xl shadow">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h3 class="font-bold">${user.name}</h3>
-                        <p class="text-gray-600 text-sm">${user.email} • ${user.role.toUpperCase()}</p>
-                        <p class="text-gray-600 text-sm">${user.phone || 'No phone'}</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="toggleUser('${user.id}')" class="px-3 py-1 ${user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} rounded">
-                            ${user.isActive ? 'Active' : 'Disabled'}
-                        </button>
-                        <button onclick="managePermissions('${user.id}')" class="px-3 py-1 bg-blue-600 text-white rounded">Permissions</button>
-                        <button onclick="deleteUser('${user.id}')" class="px-3 py-1 bg-red-600 text-white rounded">Delete</button>
-                    </div>
-                </div>
-                ${user.isActive ? `
-                    <div class="border-t pt-3">
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                            <div class="${user.permissions.addDish ? 'text-green-600' : 'text-gray-400'}">✓ Add Dish: ${user.permissions.addDish ? 'Yes' : 'No'}</div>
-                            <div class="${user.permissions.editDish ? 'text-green-600' : 'text-gray-400'}">✓ Edit Dish: ${user.permissions.editDish ? 'Yes' : 'No'}</div>
-                            <div class="${user.permissions.deleteDish ? 'text-green-600' : 'text-gray-400'}">✓ Delete Dish: ${user.permissions.deleteDish ? 'Yes' : 'No'}</div>
-                            <div class="${user.permissions.reserveTable ? 'text-green-600' : 'text-gray-400'}">✓ Reserve Table: ${user.permissions.reserveTable ? 'Yes' : 'No'}</div>
-                            <div class="${user.permissions.viewTableOrders ? 'text-green-600' : 'text-gray-400'}">✓ View Orders: ${user.permissions.viewTableOrders ? 'Yes' : 'No'}</div>
-                            <div class="${user.permissions.viewOrderHistory ? 'text-green-600' : 'text-gray-400'}">✓ View History: ${user.permissions.viewOrderHistory ? 'Yes' : 'No'}</div>
-                            <div class="${user.permissions.viewByName ? 'text-green-600' : 'text-gray-400'}">✓ View by Name: ${user.permissions.viewByName ? 'Yes' : 'No'}</div>
-                        </div>
-                    </div>
-                ` : ''}
-            </div>
-        `;
-    });
-    document.getElementById('usersList').innerHTML = html || '<p class="text-gray-500 text-center py-8">No users found (Admin is hidden)</p>';
-}
-
-function toggleUser(id) {
-    const user = users.find(u => u.id === id);
-    if (user) {
-        user.isActive = !user.isActive;
-        renderUsers();
-        alert(`User ${user.name} is now ${user.isActive ? 'enabled' : 'disabled'}`);
-    }
-}
-
-function deleteUser(id) {
-    if (confirm('Are you sure you want to delete this user?')) {
-        users = users.filter(u => u.id !== id);
-        renderUsers();
-        updateStats();
-    }
-}
-
-function managePermissions(userId) {
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
-    
-    // Create permissions modal
-    let modalHTML = `
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                <h3 class="text-2xl font-bold mb-6">Manage Permissions for ${user.name}</h3>
-                <div class="space-y-6">
-                    <div class="bg-yellow-50 p-4 rounded-lg">
-                        <p class="text-sm">User must be <strong>Active</strong> for permissions to work. Current status: <span class="${user.isActive ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}">${user.isActive ? 'ACTIVE' : 'DISABLED'}</span></p>
-                        <button onclick="toggleUser('${user.id}');closePermissionsModal();" class="mt-2 px-3 py-1 ${user.isActive ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'} rounded">
-                            ${user.isActive ? 'Disable User' : 'Enable User'}
-                        </button>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    `;
-    
-    // List all permissions with radio buttons
-    const permissions = [
-        { id: 'addDish', label: 'Add Dish', description: 'Can add new dishes to menu' },
-        { id: 'editDish', label: 'Edit Dish', description: 'Can edit existing dishes' },
-        { id: 'deleteDish', label: 'Delete Dish', description: 'Can delete dishes from menu' },
-        { id: 'reserveTable', label: 'Reserve Table', description: 'Can make table reservations' },
-        { id: 'viewTableOrders', label: 'View Table Orders', description: 'Can view current orders by table' },
-        { id: 'viewOrderHistory', label: 'View Order History', description: 'Can view order history' },
-        { id: 'viewByName', label: 'View by Name', description: 'Can view history by customer name' }
-    ];
-    
-    permissions.forEach(perm => {
-        const isEnabled = user.permissions[perm.id];
-        modalHTML += `
-            <div class="border rounded-lg p-4 ${isEnabled ? 'border-green-200 bg-green-50' : 'border-gray-200'}">
-                <div class="flex justify-between items-center mb-2">
-                    <h4 class="font-bold">${perm.label}</h4>
-                    <div class="flex gap-2">
-                        <label class="flex items-center">
-                            <input type="radio" name="${perm.id}" value="true" ${isEnabled ? 'checked' : ''} 
-                                   onchange="updateUserPermission('${user.id}', '${perm.id}', true)" 
-                                   class="mr-1" ${!user.isActive ? 'disabled' : ''}>
-                            <span class="text-sm ${!user.isActive ? 'text-gray-400' : 'text-green-600'}">Enable</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="${perm.id}" value="false" ${!isEnabled ? 'checked' : ''} 
-                                   onchange="updateUserPermission('${user.id}', '${perm.id}', false)" 
-                                   class="mr-1" ${!user.isActive ? 'disabled' : ''}>
-                            <span class="text-sm ${!user.isActive ? 'text-gray-400' : 'text-red-600'}">Disable</span>
-                        </label>
-                    </div>
-                </div>
-                <p class="text-sm text-gray-600">${perm.description}</p>
-            </div>
-        `;
-    });
-    
-    modalHTML += `
-                    </div>
-                    
-                    <div class="flex gap-3 pt-4 border-t">
-                        <button onclick="closePermissionsModal()" class="flex-1 bg-gray-300 py-2 rounded-lg">Close</button>
-                        <button onclick="applyPresetPermissions('${user.id}', 'manager')" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg" ${!user.isActive ? 'disabled' : ''}>Manager Preset</button>
-                        <button onclick="applyPresetPermissions('${user.id}', 'waiter')" class="px-4 py-2 bg-green-100 text-green-700 rounded-lg" ${!user.isActive ? 'disabled' : ''}>Waiter Preset</button>
-                        <button onclick="applyPresetPermissions('${user.id}', 'chef')" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg" ${!user.isActive ? 'disabled' : ''}>Chef Preset</button>
-                    </div>
-                </div>
+        <!-- Role Selection -->
+        <div class="mb-6">
+            <p class="font-medium mb-2">Role:</p>
+            <div class="flex flex-wrap gap-4">
+                <label class="flex items-center">
+                    <input type="radio" name="editUserRole" value="manager" class="mr-2">
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded">Manager</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="editUserRole" value="chef" class="mr-2">
+                    <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded">Chef</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="editUserRole" value="waiter" class="mr-2">
+                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded">Waiter</span>
+                </label>
             </div>
         </div>
-    `;
-    
-    // Remove any existing permissions modal
-    const existingModal = document.getElementById('permissionsModal');
-    if (existingModal) existingModal.remove();
-    
-    // Add new modal
-    const modalDiv = document.createElement('div');
-    modalDiv.id = 'permissionsModal';
-    modalDiv.innerHTML = modalHTML;
-    document.body.appendChild(modalDiv);
-}
-
-function closePermissionsModal() {
-    const modal = document.getElementById('permissionsModal');
-    if (modal) modal.remove();
-    renderUsers();
-}
-
-function updateUserPermission(userId, permission, value) {
-    const user = users.find(u => u.id === userId);
-    if (user && user.isActive) {
-        user.permissions[permission] = value;
-        renderUsers();
-    }
-}
-
-function applyPresetPermissions(userId, role) {
-    const user = users.find(u => u.id === userId);
-    if (!user || !user.isActive) {
-        alert('User must be active to apply permissions');
-        return;
-    }
-    
-    const presets = {
-        manager: {
-            addDish: true,
-            editDish: true,
-            deleteDish: false,
-            reserveTable: true,
-            viewTableOrders: true,
-            viewOrderHistory: true,
-            viewByName: true
-        },
-        waiter: {
-            addDish: false,
-            editDish: false,
-            deleteDish: false,
-            reserveTable: true,
-            viewTableOrders: true,
-            viewOrderHistory: false,
-            viewByName: false
-        },
-        chef: {
-            addDish: false,
-            editDish: false,
-            deleteDish: false,
-            reserveTable: false,
-            viewTableOrders: true,
-            viewOrderHistory: false,
-            viewByName: false
-        }
-    };
-    
-    if (presets[role]) {
-        user.permissions = { ...presets[role] };
-        alert(`Applied ${role} permissions preset`);
-        closePermissionsModal();
-    }
-}
-
-function renderDishes() {
-    let html = '';
-    dishes.forEach(dish => {
-        if (!dish.isActive) return;
-        html += `
-            <div class="bg-white rounded-xl shadow overflow-hidden">
-                <img src="${dish.imageUrl}" alt="${dish.name}" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <div class="flex justify-between items-start">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Menu & Dishes Permissions -->
+            <div class="space-y-4">
+                <h4 class="font-bold text-lg border-b pb-2">Menu & Dishes Permissions</h4>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
-                            <h3 class="font-bold text-lg">${dish.name}</h3>
-                            <p class="text-gray-600 text-sm">${dish.description}</p>
+                            <span class="font-medium">Add New Dish</span>
+                            <p class="text-xs text-gray-500">Can add new dishes to menu</p>
                         </div>
-                        <span class="font-bold text-lg">₹${dish.price}</span>
+                        <input type="checkbox" id="permAddDish" class="w-5 h-5">
                     </div>
-                    <div class="flex justify-between mt-4">
-                        <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">${dish.category}</span>
-                        <div class="flex gap-2">
-                            ${hasPermission('editDish') ? `<button onclick="editDish('${dish.id}')" class="px-3 py-1 bg-blue-100 text-blue-700 rounded">Edit</button>` : ''}
-                            ${hasPermission('deleteDish') ? `<button onclick="deleteDish('${dish.id}')" class="px-3 py-1 bg-red-100 text-red-700 rounded">Delete</button>` : ''}
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <span class="font-medium">Edit Dish</span>
+                            <p class="text-xs text-gray-500">Can modify existing dishes</p>
                         </div>
+                        <input type="checkbox" id="permEditDish" class="w-5 h-5">
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <span class="font-medium">Delete Dish</span>
+                            <p class="text-xs text-gray-500">Can remove dishes from menu</p>
+                        </div>
+                        <input type="checkbox" id="permDeleteDish" class="w-5 h-5">
                     </div>
                 </div>
             </div>
-        `;
-    });
-    document.getElementById('dishesList').innerHTML = html;
-}
-
-function 
-
-
-    
-</script>
-
+            
+            <!-- Table & Orders Permissions -->
+            <div class="space-y-4">
+                <h4 class="font-bold text-lg border-b pb-2">Table & Orders Permissions</h4>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <span class="font-medium">Reserve Table</span>
+                            <p class="text-xs text-gray-500">Can create table reservations</p>
+                        </div>
+                        <input type="checkbox" id="permReserveTable" class="w-5 h-5">
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <span class="font-medium">View Table Orders</span>
+                            <p class="text-xs text-gray-500">Can see current table orders</p>
+                        </div>
+                        <input type="checkbox" id="permViewTableOrders" class="w-5 h-5">
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <span class="font-medium">View Order History (Table)</span>
+                            <p class="text-xs text-gray-500">Can see past orders by table</p>
+                        </div>
+                        <input type="checkbox" id="permViewOrderHistoryTable" class="w-5 h-5">
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <span class="font-medium">View Order History (Name)</span>
+                            <p class="text-xs text-gray-500">Can see past orders by customer name</p>
+                        </div>
+                        <input type="checkbox" id="permViewOrderHistoryName" class="w-5 h-5">
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <span class="font-medium">View Revenue</span>
+                            <p class="text-xs text-gray-500">Can see revenue statistics</p>
+                        </div>
+                        <input type="checkbox" id="permViewRevenue" class="w-5 h-5">
+          
