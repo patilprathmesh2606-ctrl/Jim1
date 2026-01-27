@@ -1,1 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Registration - Digital Menu System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .plan-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .plan-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .plan-card.selected {
+            border-color: #3b82f6;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+        }
+        
+        .checkbox-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .terms-box {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9fafb;
+        }
+        
+        .upi-qr-code {
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        
+        .payment-method {
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .payment-method.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
 
+<!-- Navigation -->
+<nav class="bg-gradient-to-r from-blue-700 to-purple-700 text-white py-4 shadow-lg">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-utensils text-2xl mr-3"></i>
+                <h1 class="text-2xl font-bold">DigitalMenuPro</h1>
+            </div>
+            <div>
+                <a href="index.html" class="text-white hover:text-blue-200">
+                    <i class="fas fa-home mr-2"></i>Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Registration Container -->
+<div class="container mx-auto px-4 py-12">
+    <!-- Progress Steps -->
+    <div class="max-w-4xl mx-auto mb-12">
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
+                    1
+                </div>
+                <div class="ml-3">
+                    <p class="font-semibold">Store Details</p>
+                    <p class="text-sm text-gray-600">Basic information</p>
+                </div>
+            </div>
+            
+            <div class="h-1 flex-1 bg-gray-200 mx-4"></div>
+            
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold">
+                    2
+                </div>
+                <div class="ml-3">
+                    <p class="font-semibold text-gray-600">Choose Plan</p>
+                    <p class="text-sm text-gray-500">Select subscription</p>
+                </div>
+            </div>
+            
+            <div class="h-1 flex-1 bg-gray-200 mx-4"></div>
+            
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold">
+                    3
+                </div>
+                <div class="ml-3">
+                    <p class="font-semibold text-gray-600">Payment</p>
+                    <p class="text-sm text-gray-500">Complete payment</p>
+                </div>
+            </div>
+            
+            <div class="h-1 flex-1 bg-gray-200 mx-4"></div>
+            
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold">
+                    4
+                </div>
+                <div class="ml-3">
+                    <p class="font-semibold text-gray-600">Complete</p>
+                    <p class="text-sm text-gray-500">Get your URL</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Form -->
+    <div id="registrationForm" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
+        <!-- Step 1: Store Details -->
+        <div id="step1">
+            <h2 class="text-2xl font-bold mb-6">Store Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Restaurant Owner Details -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold border-b pb-2">Owner Information</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                        <input type="text" id="ownerName" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+                        <input type="email" id="ownerEmail" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                        <input type="tel" id="ownerPhone" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="+91XXXXXXXXXX">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Create Password *</label>
+                        <input type="password" id="ownerPassword" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <!-- Restaurant Details -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold border-b pb-2">Restaurant Details</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Restaurant Name *</label>
+                        <input type="text" id="restaurantName" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">This will appear on your digital menu</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Restaurant Type</label>
+                        <select id="restaurantType" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select Type</option>
+                            <option value="fine_dining">Fine Dining</option>
+                            <option value="casual_dining">Casual Dining</option>
+                            <option value="fast_food">Fast Food</option>
+                            <option value="cafe">Cafe</option>
+                            <option value="bar">Bar & Pub</option>
+                            <option value="food_truck">Food Truck</option>
+                            <option value="bakery">Bakery</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                        <textarea id="restaurantAddress" rows="2" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Custom URL Slug *</label>
+                        <div class="flex items-center">
+                            <span class="px-3 py-2 bg-gray-100 border border-r-0 rounded-l-lg">digitalmenupro.com/</span>
+                            <input type="text" id="urlSlug" class="flex-1 px-4 py-2 border rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Choose a unique URL for your menu (letters, numbers, hyphens only)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t">
+                <button onclick="validateStep1()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                    Continue to Plan Selection <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Plan Selection -->
+        <div id="step2" class="hidden">
+            <h2 class="text-2xl font-bold mb-6">Choose Your Plan</h2>
+            <p class="text-gray-600 mb-8">Select the perfect plan for your restaurant. All plans include digital menu, table reservations, and basic analytics.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Basic Plan -->
+                <div class="plan-card bg-white border rounded-xl p-6" onclick="selectPlan('basic')">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold mb-2">Basic</h3>
+                        <div class="flex items-center justify-center">
+                            <span class="text-4xl font-bold">₹499</span>
+                            <span class="text-gray-600 ml-2">/month</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">Billed monthly</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Digital Menu (up to 50 items)</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Table Reservation System</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Basic Analytics</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Email Support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-times text-gray-300 mr-3"></i>
+                            <span class="text-gray-400">Order Management</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-times text-gray-300 mr-3"></i>
+                            <span class="text-gray-400">Staff Management</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-times text-gray-300 mr-3"></i>
+                            <span class="text-gray-400">Custom Domain</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="text-center">
+                        <button class="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50">
+                            Select Plan
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Pro Plan (Recommended) -->
+                <div class="plan-card bg-gradient-to-b from-blue-50 to-white border-2 border-blue-200 rounded-xl p-6 relative" onclick="selectPlan('pro')">
+                    <div class="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 rounded-bl-lg rounded-tr-lg text-sm font-medium">
+                        MOST POPULAR
+                    </div>
+                    
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold mb-2">Pro</h3>
+                        <div class="flex items-center justify-center">
+                            <span class="text-4xl font-bold">₹999</span>
+                            <span class="text-gray-600 ml-2">/month</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">Billed monthly</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Digital Menu (unlimited items)</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Table Reservation System</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Advanced Analytics</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Priority Support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Order Management</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Staff Management (up to 5 users)</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-times text-gray-300 mr-3"></i>
+                            <span class="text-gray-400">Custom Domain</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="text-center">
+                        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            Select Plan
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Enterprise Plan -->
+                <div class="plan-card bg-white border rounded-xl p-6" onclick="selectPlan('enterprise')">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold mb-2">Enterprise</h3>
+                        <div class="flex items-center justify-center">
+                            <span class="text-4xl font-bold">₹1,999</span>
+                            <span class="text-gray-600 ml-2">/month</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">Billed monthly</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Everything in Pro</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Custom Domain Support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Unlimited Staff Users</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>API Access</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>White-label Option</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Dedicated Account Manager</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Custom Development</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="text-center">
+                        <button class="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50">
+                            Select Plan
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Auto-pay Option -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="autoPay" class="mt-1 w-5 h-5">
+                    <div>
+                        <label for="autoPay" class="font-medium text-lg">Enable Auto-Pay (UPI Auto-Debit)</label>
+                        <p class="text-gray-600 mt-1">Your subscription will automatically renew each month via UPI mandate. You can cancel anytime from your dashboard.</p>
+                        <p class="text-sm text-gray-500 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            By enabling auto-pay, you authorize us to collect monthly payments via UPI.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-between pt-6 border-t">
+                <button onclick="backToStep1()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i> Back
+                </button>
+                <button onclick="validateStep2()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                    Continue to Payment <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: UPI Payment & Terms -->
+        <div id="step3" class="hidden">
+            <h2 class="text-2xl font-bold mb-6">Payment & Terms</h2>
+            
+            <!-- Payment Method Selection -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-4">Choose Payment Method</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- UPI QR Code Payment -->
+                    <div class="payment-method bg-white border rounded-xl p-6 text-center" onclick="selectPaymentMethod(
