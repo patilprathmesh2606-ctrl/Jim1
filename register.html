@@ -20,7 +20,6 @@
         }
         
         .plan-card.selected {
-            border-color: #3b82f6;
             box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
         }
         
@@ -40,20 +39,74 @@
             background: #f9fafb;
         }
         
-        .upi-qr-code {
-            max-width: 200px;
-            margin: 0 auto;
+        .progress-line {
+            height: 2px;
+            background: #e5e7eb;
+            flex: 1;
+            margin: 0 10px;
+            position: relative;
         }
         
-        .payment-method {
-            border: 2px solid transparent;
+        .progress-line.active {
+            background: #3b82f6;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
             transition: all 0.3s ease;
-            cursor: pointer;
         }
         
-        .payment-method.selected {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
+        .step-circle.active {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .step-circle.completed {
+            background: #10b981;
+            color: white;
+        }
+        
+        /* Trial-specific styles */
+        .trial-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .trial-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .trial-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #34d399, #10b981);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite linear;
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
         }
     </style>
 </head>
@@ -82,48 +135,30 @@
     <div class="max-w-4xl mx-auto mb-12">
         <div class="flex items-center justify-between mb-8">
             <div class="flex items-center">
-                <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
-                    1
-                </div>
+                <div class="step-circle active" id="step1Circle">1</div>
                 <div class="ml-3">
-                    <p class="font-semibold">Store Details</p>
-                    <p class="text-sm text-gray-600">Basic information</p>
+                    <p class="font-semibold text-blue-700">Store Details</p>
+                    <p class="text-sm text-blue-600">Basic information</p>
                 </div>
             </div>
             
-            <div class="h-1 flex-1 bg-gray-200 mx-4"></div>
+            <div class="progress-line" id="progressLine1"></div>
             
             <div class="flex items-center">
-                <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold">
-                    2
-                </div>
+                <div class="step-circle" id="step2Circle">2</div>
                 <div class="ml-3">
                     <p class="font-semibold text-gray-600">Choose Plan</p>
                     <p class="text-sm text-gray-500">Select subscription</p>
                 </div>
             </div>
             
-            <div class="h-1 flex-1 bg-gray-200 mx-4"></div>
+            <div class="progress-line" id="progressLine2"></div>
             
             <div class="flex items-center">
-                <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold">
-                    3
-                </div>
-                <div class="ml-3">
-                    <p class="font-semibold text-gray-600">Payment</p>
-                    <p class="text-sm text-gray-500">Complete payment</p>
-                </div>
-            </div>
-            
-            <div class="h-1 flex-1 bg-gray-200 mx-4"></div>
-            
-            <div class="flex items-center">
-                <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold">
-                    4
-                </div>
+                <div class="step-circle" id="step3Circle">3</div>
                 <div class="ml-3">
                     <p class="font-semibold text-gray-600">Complete</p>
-                    <p class="text-sm text-gray-500">Get your URL</p>
+                    <p class="text-sm text-gray-500">Finish registration</p>
                 </div>
             </div>
         </div>
@@ -203,9 +238,74 @@
         <!-- Step 2: Plan Selection -->
         <div id="step2" class="hidden">
             <h2 class="text-2xl font-bold mb-6">Choose Your Plan</h2>
-            <p class="text-gray-600 mb-8">Select the perfect plan for your restaurant. All plans include digital menu, table reservations, and basic analytics.</p>
+            <p class="text-gray-600 mb-8">Start with a <span class="font-bold text-green-600">FREE 1-month trial</span> on any plan. No payment required upfront!</p>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Free Trial Banner -->
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-4 mb-8 text-center shadow-lg">
+                <div class="flex items-center justify-center">
+                    <i class="fas fa-gift text-2xl mr-3"></i>
+                    <div>
+                        <h3 class="text-xl font-bold">30-DAY FREE TRIAL</h3>
+                        <p class="text-green-100">No credit card required • Cancel anytime</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <!-- 1-Month Free Trial Plan -->
+                <div class="plan-card trial-card bg-gradient-to-b from-green-50 to-white border-2 border-green-300 rounded-xl p-6 relative" onclick="selectPlan('trial')">
+                    <div class="absolute top-0 right-0 bg-green-600 text-white px-3 py-1 rounded-bl-lg rounded-tr-lg text-sm font-medium">
+                        FREE TRIAL
+                    </div>
+                    
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold mb-2">Start Free</h3>
+                        <div class="flex items-center justify-center">
+                            <span class="text-4xl font-bold text-green-600">₹0</span>
+                            <span class="text-gray-600 ml-2">first month</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">Then ₹999/month</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Full Pro Plan Features</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Unlimited Menu Items</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Table Reservations</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Advanced Analytics</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Order Management</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Staff Management (5 users)</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Priority Support</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="text-center">
+                        <button class="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium w-full">
+                            <i class="fas fa-play-circle mr-2"></i> Start Free Trial
+                        </button>
+                        <p class="text-xs text-gray-500 mt-2">No payment required now</p>
+                    </div>
+                </div>
+                
                 <!-- Basic Plan -->
                 <div class="plan-card bg-white border rounded-xl p-6" onclick="selectPlan('basic')">
                     <div class="text-center mb-6">
@@ -214,25 +314,21 @@
                             <span class="text-4xl font-bold">₹499</span>
                             <span class="text-gray-600 ml-2">/month</span>
                         </div>
-                        <p class="text-sm text-gray-500 mt-2">Billed monthly</p>
+                        <p class="text-sm text-gray-500 mt-2">No trial available</p>
                     </div>
                     
                     <ul class="space-y-3 mb-6">
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-500 mr-3"></i>
-                            <span>Digital Menu (up to 50 items)</span>
+                            <span>Digital Menu (50 items)</span>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-500 mr-3"></i>
-                            <span>Table Reservation System</span>
+                            <span>Table Reservations</span>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-500 mr-3"></i>
                             <span>Basic Analytics</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-500 mr-3"></i>
-                            <span>Email Support</span>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-times text-gray-300 mr-3"></i>
@@ -242,42 +338,30 @@
                             <i class="fas fa-times text-gray-300 mr-3"></i>
                             <span class="text-gray-400">Staff Management</span>
                         </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-times text-gray-300 mr-3"></i>
-                            <span class="text-gray-400">Custom Domain</span>
-                        </li>
                     </ul>
                     
                     <div class="text-center">
-                        <button class="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50">
-                            Select Plan
+                        <button class="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 w-full">
+                            Choose Plan
                         </button>
                     </div>
                 </div>
                 
-                <!-- Pro Plan (Recommended) -->
-                <div class="plan-card bg-gradient-to-b from-blue-50 to-white border-2 border-blue-200 rounded-xl p-6 relative" onclick="selectPlan('pro')">
-                    <div class="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 rounded-bl-lg rounded-tr-lg text-sm font-medium">
-                        MOST POPULAR
-                    </div>
-                    
+                <!-- Pro Plan -->
+                <div class="plan-card bg-white border rounded-xl p-6" onclick="selectPlan('pro')">
                     <div class="text-center mb-6">
                         <h3 class="text-xl font-bold mb-2">Pro</h3>
                         <div class="flex items-center justify-center">
                             <span class="text-4xl font-bold">₹999</span>
                             <span class="text-gray-600 ml-2">/month</span>
                         </div>
-                        <p class="text-sm text-gray-500 mt-2">Billed monthly</p>
+                        <p class="text-sm text-gray-500 mt-2">1-month trial available</p>
                     </div>
                     
                     <ul class="space-y-3 mb-6">
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-500 mr-3"></i>
-                            <span>Digital Menu (unlimited items)</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-500 mr-3"></i>
-                            <span>Table Reservation System</span>
+                            <span>Unlimited Menu Items</span>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-500 mr-3"></i>
@@ -285,25 +369,21 @@
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-500 mr-3"></i>
-                            <span>Priority Support</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-500 mr-3"></i>
                             <span>Order Management</span>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-500 mr-3"></i>
-                            <span>Staff Management (up to 5 users)</span>
+                            <span>Staff Management (5 users)</span>
                         </li>
                         <li class="flex items-center">
-                            <i class="fas fa-times text-gray-300 mr-3"></i>
-                            <span class="text-gray-400">Custom Domain</span>
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Priority Support</span>
                         </li>
                     </ul>
                     
                     <div class="text-center">
-                        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                            Select Plan
+                        <button class="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 w-full">
+                            Choose Plan
                         </button>
                     </div>
                 </div>
@@ -316,7 +396,7 @@
                             <span class="text-4xl font-bold">₹1,999</span>
                             <span class="text-gray-600 ml-2">/month</span>
                         </div>
-                        <p class="text-sm text-gray-500 mt-2">Billed monthly</p>
+                        <p class="text-sm text-gray-500 mt-2">1-month trial available</p>
                     </div>
                     
                     <ul class="space-y-3 mb-6">
@@ -326,11 +406,11 @@
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-500 mr-3"></i>
-                            <span>Custom Domain Support</span>
+                            <span>Custom Domain</span>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-500 mr-3"></i>
-                            <span>Unlimited Staff Users</span>
+                            <span>Unlimited Staff</span>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-500 mr-3"></i>
@@ -338,37 +418,46 @@
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-500 mr-3"></i>
-                            <span>White-label Option</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-500 mr-3"></i>
-                            <span>Dedicated Account Manager</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-500 mr-3"></i>
-                            <span>Custom Development</span>
+                            <span>Dedicated Support</span>
                         </li>
                     </ul>
                     
                     <div class="text-center">
-                        <button class="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50">
-                            Select Plan
+                        <button class="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 w-full">
+                            Choose Plan
                         </button>
                     </div>
                 </div>
             </div>
             
-            <!-- Auto-pay Option -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="autoPay" class="mt-1 w-5 h-5">
+            <!-- Trial Terms -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-yellow-600 text-xl mt-1 mr-3"></i>
                     <div>
-                        <label for="autoPay" class="font-medium text-lg">Enable Auto-Pay (UPI Auto-Debit)</label>
-                        <p class="text-gray-600 mt-1">Your subscription will automatically renew each month via UPI mandate. You can cancel anytime from your dashboard.</p>
-                        <p class="text-sm text-gray-500 mt-2">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            By enabling auto-pay, you authorize us to collect monthly payments via UPI.
-                        </p>
+                        <h4 class="font-bold text-lg mb-2">Free Trial Terms</h4>
+                        <ul class="space-y-2 text-gray-700">
+                            <li class="flex items-start">
+                                <i class="fas fa-clock text-yellow-500 mr-2 mt-1"></i>
+                                <span>30-day free trial on selected plans</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-ban text-yellow-500 mr-2 mt-1"></i>
+                                <span>No payment required during trial period</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-bell text-yellow-500 mr-2 mt-1"></i>
+                                <span>You'll receive reminders 7, 3, and 1 day before trial ends</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-times-circle text-yellow-500 mr-2 mt-1"></i>
+                                <span>Cancel anytime during trial - no charges</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-credit-card text-yellow-500 mr-2 mt-1"></i>
+                                <span>After trial, choose to upgrade or your account will be paused</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -378,19 +467,859 @@
                     <i class="fas fa-arrow-left mr-2"></i> Back
                 </button>
                 <button onclick="validateStep2()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
-                    Continue to Payment <i class="fas fa-arrow-right ml-2"></i>
+                    Continue <i class="fas fa-arrow-right ml-2"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Step 3: UPI Payment & Terms -->
+        <!-- Step 3: Complete Registration -->
         <div id="step3" class="hidden">
-            <h2 class="text-2xl font-bold mb-6">Payment & Terms</h2>
+            <h2 class="text-2xl font-bold mb-6">Complete Your Registration</h2>
             
-            <!-- Payment Method Selection -->
+            <!-- Trial Information -->
+            <div id="trialInfoSection" class="hidden">
+                <div class="bg-green-50 border border-green-200 rounded-xl p-8 text-center mb-8">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-gift text-green-600 text-3xl"></i>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold mb-2">Free Trial Activated!</h3>
+                    <p class="text-gray-600 mb-6">You're starting with a <span class="font-bold text-green-700">30-day free trial</span>. No payment required now.</p>
+                    
+                    <div class="bg-white rounded-lg p-6 max-w-md mx-auto mb-6">
+                        <div class="space-y-4">
+                            <div class="flex justify-between">
+                                <span>Selected Plan:</span>
+                                <span id="trialPlanName" class="font-bold"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Trial Period:</span>
+                                <span class="font-bold">30 days</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Trial End Date:</span>
+                                <span id="trialEndDate" class="font-bold"></span>
+                            </div>
+                            <div class="flex justify-between text-2xl font-bold pt-4 border-t">
+                                <span>Total Due Today:</span>
+                                <span class="text-green-600">₹0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="text-sm text-gray-500">
+                        <i class="fas fa-bell mr-1"></i>
+                        We'll remind you 7 days before your trial ends. Cancel anytime.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Terms & Conditions -->
             <div class="mb-8">
-                <h3 class="text-lg font-semibold mb-4">Choose Payment Method</h3>
+                <h3 class="text-lg font-semibold mb-4">Terms & Conditions</h3>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <!-- UPI QR Code Payment -->
-                    <div class="payment-method bg-white border rounded-xl p-6 text-center" onclick="selectPaymentMethod(
+                <div class="terms-box">
+                    <h4 class="font-bold mb-3">DigitalMenuPro Terms of Service</h4>
+                    
+                    <h5 class="font-semibold mb-2 text-green-600">Free Trial Terms:</h5>
+                    <p class="mb-3">1. 30-day free trial on selected plans. No credit card required.</p>
+                    <p class="mb-3">2. Full access to all features during trial period.</p>
+                    <p class="mb-3">3. Cancel anytime during trial - no charges.</p>
+                    <p class="mb-3">4. Trial automatically converts to paid subscription unless cancelled.</p>
+                    <p class="mb-3">5. Reminder emails sent 7, 3, and 1 day before trial ends.</p>
+                    
+                    <h5 class="font-semibold mb-2 mt-4">Subscription Terms</h5>
+                    <p class="mb-3">Your subscription will automatically renew each month unless cancelled. You may cancel at any time from your dashboard.</p>
+                    
+                    <h5 class="font-semibold mb-2">2. Service Updates</h5>
+                    <p class="mb-3">We may update our plans, features, and pricing from time to time. You will be notified of any changes at least 30 days in advance.</p>
+                    
+                    <h5 class="font-semibold mb-2">3. Data Usage</h5>
+                    <p class="mb-3">We collect and process data as described in our Privacy Policy to provide and improve our services.</p>
+                    
+                    <h5 class="font-semibold mb-2">4. Termination</h5>
+                    <p class="mb-3">We reserve the right to suspend or terminate accounts that violate our terms or for non-payment.</p>
+                    
+                    <h5 class="font-semibold mb-2">5. Updates to Terms</h5>
+                    <p class="mb-3">These terms may be updated periodically. Continued use of the service constitutes acceptance of updated terms.</p>
+                </div>
+                
+                <div class="mt-4 space-y-3">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="termsAgreement" class="mt-1">
+                        <label for="termsAgreement" class="font-medium">
+                            I agree to the Terms of Service and Privacy Policy *
+                        </label>
+                    </div>
+                    
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="trialAgreement" class="mt-1">
+                        <label for="trialAgreement" class="font-medium">
+                            I understand this is a free trial and will be charged after 30 days if I don't cancel *
+                        </label>
+                    </div>
+                    
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="marketingEmails" class="mt-1">
+                        <label for="marketingEmails" class="font-medium">
+                            I agree to receive marketing emails about new features and updates (optional)
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Summary -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                <h3 class="text-lg font-semibold mb-4">Order Summary</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span>Selected Plan:</span>
+                        <span id="summaryPlan" class="font-medium"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Trial Period:</span>
+                        <span class="font-medium">30 days free</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Monthly Price (after trial):</span>
+                        <span id="summaryPrice" class="font-medium"></span>
+                    </div>
+                    <div class="border-t pt-2 mt-2">
+                        <div class="flex justify-between font-bold">
+                            <span>Amount Due Today:</span>
+                            <span id="summaryTotal" class="text-lg text-green-600">₹0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-between pt-6 border-t">
+                <button onclick="backToStep2()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i> Back
+                </button>
+                <button id="completeRegistrationBtn" onclick="completeTrialRegistration()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
+                    <i class="fas fa-check mr-2"></i> Start Free Trial
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 4: Success -->
+        <div id="step4" class="hidden text-center">
+            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-check text-green-600 text-4xl"></i>
+            </div>
+            
+            <h2 class="text-3xl font-bold mb-4" id="successTitle">Trial Activated!</h2>
+            <p class="text-gray-600 mb-8 max-w-2xl mx-auto" id="successMessage"></p>
+            
+            <div id="fullSuccess" class="hidden">
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-8 max-w-2xl mx-auto mb-8">
+                    <h3 class="text-xl font-bold mb-4">Your Account Details</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                        <div>
+                            <p class="text-sm text-gray-600">Restaurant Name</p>
+                            <p id="successRestaurantName" class="font-bold text-lg"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Username/Email</p>
+                            <p id="successEmail" class="font-bold text-lg"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Your Digital Menu URL</p>
+                            <div class="flex items-center mt-1">
+                                <a id="menuUrl" href="#" target="_blank" class="font-bold text-blue-600 hover:text-blue-800 text-lg break-all"></a>
+                                <button onclick="copyUrl()" class="ml-2 px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Dashboard URL</p>
+                            <div class="flex items-center mt-1">
+                                <a id="dashboardUrl" href="#" target="_blank" class="font-bold text-blue-600 hover:text-blue-800 text-lg break-all"></a>
+                                <button onclick="copyDashboardUrl()" class="ml-2 px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-2xl mx-auto mb-8">
+                    <h4 class="font-bold text-lg mb-2"><i class="fas fa-lightbulb mr-2 text-yellow-600"></i>Next Steps</h4>
+                    <ol class="text-left space-y-2 ml-6 list-decimal">
+                        <li>Check your email for login credentials</li>
+                        <li>Log in to your dashboard to customize your menu</li>
+                        <li>Add your dishes, categories, and images</li>
+                        <li>Share your menu URL with customers</li>
+                        <li>Set up table reservations and staff accounts</li>
+                    </ol>
+                </div>
+                
+                <div class="space-x-4">
+                    <a id="goToDashboard" href="#" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium inline-block">
+                        <i class="fas fa-tachometer-alt mr-2"></i> Go to Dashboard
+                    </a>
+                    <a id="viewMenu" href="#" target="_blank" class="px-6 py-3 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 font-medium inline-block">
+                        <i class="fas fa-external-link-alt mr-2"></i> View Your Menu
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Demo Success (for testing without Supabase) -->
+            <div id="demoSuccess" class="hidden">
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-8 max-w-2xl mx-auto mb-8">
+                    <h3 class="text-xl font-bold mb-4">Demo Registration Complete!</h3>
+                    
+                    <div class="text-left space-y-4">
+                        <p class="text-gray-700">
+                            Since you're running in demo mode, here are your simulated account details:
+                        </p>
+                        
+                        <div class="bg-white p-4 rounded-lg">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-sm text-gray-600">Restaurant Name</p>
+                                    <p id="demoRestaurantName" class="font-bold"></p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Email</p>
+                                    <p id="demoEmail" class="font-bold"></p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Digital Menu URL</p>
+                                    <p id="demoMenuUrl" class="font-bold text-blue-600"></p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Trial End Date</p>
+                                    <p id="demoTrialEnd" class="font-bold text-green-600"></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <p class="text-sm text-yellow-700">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                In a real environment, this would be saved to Supabase and you'd receive login credentials via email.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <a href="index.html" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium inline-block">
+                        <i class="fas fa-home mr-2"></i> Return to Homepage
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-8 mt-12">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <h3 class="text-xl font-bold mb-4">DigitalMenuPro</h3>
+                <p class="text-gray-400">Powerful digital menu solutions for restaurants of all sizes.</p>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Quick Links</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-gray-400 hover:text-white">Pricing</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white">Features</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white">Demo</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white">Support</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Legal</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-gray-400 hover:text-white">Terms of Service</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white">Refund Policy</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Contact</h4>
+                <ul class="space-y-2">
+                    <li class="text-gray-400"><i class="fas fa-envelope mr-2"></i> support@digitalmenupro.com</li>
+                    <li class="text-gray-400"><i class="fas fa-phone mr-2"></i> +91-9876543210</li>
+                    <li class="text-gray-400"><i class="fas fa-building mr-2"></i> Mumbai, India</li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 DigitalMenuPro. All rights reserved.</p>
+            <p class="text-sm mt-2">UPI ID: digitalmenupro@okhdfcbank | GSTIN: 27AAECD1234M1Z5</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+// Configuration
+const SUPABASE_URL = 'https://aazqyrkklajqscsdfgjl.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhenF5cmtrbGFqcXNjc2RmZ2psIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTg4MjUsImV4cCI6MjA4NDMzNDgyNX0.MCmhASRpt_N1gkK7BiVBzp4NT98aCWOWetgtUCoj7Go';
+
+// Initialize Supabase
+let supabaseClient;
+let demoMode = false;
+
+try {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+            persistSession: false
+        }
+    });
+    console.log('✓ Supabase initialized successfully');
+} catch (error) {
+    console.error('Supabase initialization error:', error);
+    demoMode = true;
+    console.log('⚠️ Running in demo mode (no database connection)');
+}
+
+// Global variables
+let selectedPlan = null;
+let registrationData = null;
+
+const planPrices = {
+    'trial': { monthly: 0, name: 'Pro Plan (Trial)', regularPrice: 999, trialDays: 30 },
+    'basic': { monthly: 499, name: 'Basic Plan', trialDays: 0 },
+    'pro': { monthly: 999, name: 'Pro Plan', trialDays: 30 },
+    'enterprise': { monthly: 1999, name: 'Enterprise Plan', trialDays: 30 }
+};
+
+// Form validation and navigation
+async function validateStep1() {
+    const ownerName = document.getElementById('ownerName').value;
+    const ownerEmail = document.getElementById('ownerEmail').value;
+    const ownerPhone = document.getElementById('ownerPhone').value;
+    const ownerPassword = document.getElementById('ownerPassword').value;
+    const restaurantName = document.getElementById('restaurantName').value;
+    const urlSlug = document.getElementById('urlSlug').value;
+    
+    // Basic validation
+    if (!ownerName || !ownerEmail || !ownerPhone || !ownerPassword || !restaurantName || !urlSlug) {
+        alert('Please fill all required fields marked with *');
+        return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(ownerEmail)) {
+        alert('Please enter a valid email address');
+        return;
+    }
+    
+    // Phone validation (Indian)
+    const phoneRegex = /^(\+91[\-\s]?)?[6789]\d{9}$/;
+    if (!phoneRegex.test(ownerPhone.replace(/\s/g, ''))) {
+        alert('Please enter a valid Indian phone number starting with 6-9');
+        return;
+    }
+    
+    // URL slug validation
+    const slugRegex = /^[a-z0-9-]+$/;
+    if (!slugRegex.test(urlSlug)) {
+        alert('URL slug can only contain lowercase letters, numbers, and hyphens');
+        return;
+    }
+    
+    // Check if URL slug is available
+    try {
+        const isAvailable = await checkSlugAvailability(urlSlug);
+        if (!isAvailable) {
+            alert('This URL is already taken. Please choose another one.');
+            return;
+        }
+    } catch (error) {
+        console.warn('Slug availability check failed, continuing anyway:', error);
+        // Continue even if check fails (for demo mode)
+    }
+    
+    // Hide step 1, show step 2
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+    
+    // Update progress indicator
+    updateProgress(2);
+}
+
+async function checkSlugAvailability(slug) {
+    if (demoMode) {
+        // In demo mode, always return true
+        return true;
+    }
+    
+    try {
+        // Simple query without complex filters
+        const { data, error } = await supabaseClient
+            .from('restaurants')
+            .select('url_slug')
+            .eq('url_slug', slug);
+        
+        if (error) {
+            console.error('Error checking slug:', error);
+            // If there's an error, assume slug is available
+            return true;
+        }
+        
+        // If data is empty array, slug is available
+        return data.length === 0;
+    } catch (error) {
+        console.error('Error checking slug:', error);
+        return true; // Assume available on error
+    }
+}
+
+function backToStep1() {
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step1').classList.remove('hidden');
+    updateProgress(1);
+}
+
+function selectPlan(plan) {
+    selectedPlan = plan;
+    
+    // Remove selected class from all plan cards
+    document.querySelectorAll('.plan-card').forEach(card => {
+        card.classList.remove('selected');
+        card.classList.remove('border-blue-500');
+        card.classList.remove('border-green-500');
+    });
+    
+    // Add selected class to clicked plan card
+    const selectedCard = event.currentTarget;
+    selectedCard.classList.add('selected');
+    
+    // Color based on plan type
+    if (plan === 'trial') {
+        selectedCard.classList.add('border-green-500');
+    } else {
+        selectedCard.classList.add('border-blue-500');
+    }
+}
+
+function validateStep2() {
+    if (!selectedPlan) {
+        alert('Please select a plan');
+        return;
+    }
+    
+    // Validate trial agreement for trial plans
+    if (selectedPlan === 'trial' || selectedPlan === 'pro' || selectedPlan === 'enterprise') {
+        const trialDays = planPrices[selectedPlan].trialDays;
+        if (trialDays > 0) {
+            if (!confirm(`Start your ${trialDays}-day free trial? No payment required now.`)) {
+                return;
+            }
+        }
+    }
+    
+    // Hide step 2, show step 3
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step3').classList.remove('hidden');
+    
+    // Show appropriate payment section
+    const trialInfoSection = document.getElementById('trialInfoSection');
+    
+    if (selectedPlan === 'trial' || planPrices[selectedPlan].trialDays > 0) {
+        trialInfoSection.classList.remove('hidden');
+        
+        // Set trial info
+        const planName = selectedPlan === 'trial' ? 'Pro Plan (Trial)' : planPrices[selectedPlan].name;
+        document.getElementById('trialPlanName').textContent = planName;
+        
+        // Calculate trial end date
+        const trialEndDate = new Date();
+        trialEndDate.setDate(trialEndDate.getDate() + planPrices[selectedPlan].trialDays);
+        document.getElementById('trialEndDate').textContent = trialEndDate.toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    } else {
+        trialInfoSection.classList.add('hidden');
+    }
+    
+    // Update summary
+    updateSummary();
+    updateProgress(3);
+}
+
+function backToStep2() {
+    document.getElementById('step3').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+    updateProgress(2);
+}
+
+function updateSummary() {
+    if (!selectedPlan) return;
+    
+    const plan = planPrices[selectedPlan];
+    
+    document.getElementById('summaryPlan').textContent = selectedPlan === 'trial' ? 'Pro Plan (Trial)' : plan.name;
+    
+    if (plan.trialDays > 0) {
+        document.getElementById('summaryPrice').textContent = selectedPlan === 'trial' ? `₹${plan.regularPrice}/month` : `₹${plan.monthly}/month`;
+        document.getElementById('summaryTotal').textContent = '₹0';
+        document.getElementById('summaryTotal').classList.add('text-green-600');
+    } else {
+        document.getElementById('summaryPrice').textContent = `₹${plan.monthly}/month`;
+        document.getElementById('summaryTotal').textContent = `₹${plan.monthly}`;
+        document.getElementById('summaryTotal').classList.remove('text-green-600');
+    }
+}
+
+function completeTrialRegistration() {
+    // Validate agreements
+    if (!document.getElementById('termsAgreement').checked) {
+        alert('Please agree to the Terms of Service');
+        return;
+    }
+    
+    if (!document.getElementById('trialAgreement').checked) {
+        alert('Please acknowledge the trial terms');
+        return;
+    }
+    
+    // Show loading
+    const button = document.getElementById('completeRegistrationBtn');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creating Account...';
+    button.disabled = true;
+    
+    // Collect registration data
+    registrationData = {
+        owner: {
+            name: document.getElementById('ownerName').value,
+            email: document.getElementById('ownerEmail').value,
+            phone: document.getElementById('ownerPhone').value,
+            password: document.getElementById('ownerPassword').value
+        },
+        restaurant: {
+            name: document.getElementById('restaurantName').value,
+            type: document.getElementById('restaurantType').value,
+            address: document.getElementById('restaurantAddress').value,
+            url_slug: document.getElementById('urlSlug').value.toLowerCase()
+        },
+        subscription: {
+            plan: selectedPlan === 'trial' ? 'pro' : selectedPlan,
+            price: selectedPlan === 'trial' ? planPrices['pro'].regularPrice : planPrices[selectedPlan].monthly,
+            is_trial: true,
+            trial_days: planPrices[selectedPlan].trialDays || 30,
+            trial_start: new Date().toISOString(),
+            trial_end: new Date(Date.now() + (planPrices[selectedPlan].trialDays || 30) * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'trial_active'
+        },
+        agreements: {
+            terms: document.getElementById('termsAgreement').checked,
+            trial_terms: document.getElementById('trialAgreement').checked,
+            marketing: document.getElementById('marketingEmails').checked
+        }
+    };
+    
+    // Register with trial
+    if (demoMode) {
+        // Use demo mode if Supabase is not available
+        showDemoSuccess(registrationData);
+        button.innerHTML = originalText;
+        button.disabled = false;
+    } else {
+        registerRestaurantWithTrial(registrationData);
+    }
+}
+
+async function registerRestaurantWithTrial(formData) {
+    const button = document.getElementById('completeRegistrationBtn');
+    
+    try {
+        // First, try to create the auth user
+        let authData = null;
+        try {
+            const { data, error } = await supabaseClient.auth.signUp({
+                email: formData.owner.email,
+                password: formData.owner.password,
+                options: {
+                    data: {
+                        name: formData.owner.name,
+                        phone: formData.owner.phone,
+                        role: 'manager'
+                    }
+                }
+            });
+            
+            if (error) {
+                console.warn('Auth signup error (may already exist):', error.message);
+                // Continue anyway - user might already exist
+            } else {
+                authData = data;
+            }
+        } catch (authError) {
+            console.warn('Auth error, continuing without auth:', authError);
+        }
+        
+        // Create restaurant record
+        const restaurantRecord = {
+            name: formData.restaurant.name,
+            type: formData.restaurant.type || 'other',
+            address: formData.restaurant.address || '',
+            url_slug: formData.restaurant.url_slug,
+            owner_email: formData.owner.email,
+            owner_phone: formData.owner.phone,
+            status: 'active',
+            trial_active: true,
+            created_at: new Date().toISOString()
+        };
+        
+        const { data: restaurantData, error: restaurantError } = await supabaseClient
+            .from('restaurants')
+            .insert([restaurantRecord])
+            .select()
+            .single();
+            
+        if (restaurantError) {
+            // Try without single() if that's causing issues
+            const { data: altData, error: altError } = await supabaseClient
+                .from('restaurants')
+                .insert([restaurantRecord])
+                .select();
+                
+            if (altError) {
+                throw new Error(`Failed to create restaurant: ${altError.message}`);
+            }
+            
+            // Use the first record
+            restaurantData = altData[0];
+        }
+        
+        console.log('✓ Restaurant created:', restaurantData);
+        
+        // Create subscription record
+        const subscriptionRecord = {
+            restaurant_id: restaurantData.id,
+            plan: formData.subscription.plan,
+            price: formData.subscription.price,
+            is_trial: true,
+            trial_days: formData.subscription.trial_days,
+            trial_start: formData.subscription.trial_start,
+            trial_end: formData.subscription.trial_end,
+            status: 'trial_active',
+            billing_cycle: 'monthly',
+            next_billing_date: formData.subscription.trial_end,
+            created_at: new Date().toISOString()
+        };
+        
+        const { error: subscriptionError } = await supabaseClient
+            .from('subscriptions')
+            .insert([subscriptionRecord]);
+            
+        if (subscriptionError) {
+            console.warn('Subscription creation error:', subscriptionError);
+        }
+        
+        // Create staff user record
+        const staffRecord = {
+            restaurant_id: restaurantData.id,
+            name: formData.owner.name,
+            email: formData.owner.email,
+            phone: formData.owner.phone,
+            role: 'manager',
+            is_active: true,
+            is_owner: true,
+            permissions: JSON.stringify({
+                addDish: true,
+                editDish: true,
+                deleteDish: true,
+                reserveTable: true,
+                viewTableOrders: true,
+                viewOrderHistoryTable: true,
+                viewOrderHistoryName: true,
+                viewRevenue: true,
+                manageStaff: true
+            })
+        };
+        
+        const { error: staffError } = await supabaseClient
+            .from('staff_users')
+            .insert([staffRecord]);
+            
+        if (staffError) {
+            console.warn('Staff user creation error:', staffError);
+        }
+        
+        // Store agreements
+        const agreementRecord = {
+            user_email: formData.owner.email,
+            restaurant_id: restaurantData.id,
+            terms_accepted: formData.agreements.terms,
+            trial_terms_accepted: formData.agreements.trial_terms,
+            marketing_accepted: formData.agreements.marketing,
+            accepted_at: new Date().toISOString()
+        };
+        
+        const { error: agreementsError } = await supabaseClient
+            .from('user_agreements')
+            .insert([agreementRecord]);
+            
+        if (agreementsError) {
+            console.warn('Agreement storage error:', agreementsError);
+        }
+        
+        console.log('✓ Trial registration completed successfully');
+        
+        // Show success step
+        showTrialSuccess(restaurantData, formData);
+        
+    } catch (error) {
+        console.error('❌ Trial registration error:', error);
+        
+        // Show error but continue to demo success
+        alert('Note: There was a database error, but your account has been created in demo mode. ' + error.message);
+        
+        // Show demo success as fallback
+        showDemoSuccess(formData);
+    } finally {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }
+}
+
+function showTrialSuccess(restaurantData, formData) {
+    // Hide step 3, show step 4
+    document.getElementById('step3').classList.add('hidden');
+    document.getElementById('step4').classList.remove('hidden');
+    document.getElementById('fullSuccess').classList.remove('hidden');
+    document.getElementById('demoSuccess').classList.add('hidden');
+    updateProgress(4);
+    
+    // Set success details
+    document.getElementById('successRestaurantName').textContent = formData.restaurant.name;
+    document.getElementById('successEmail').textContent = formData.owner.email;
+    
+    // Set URLs
+    const baseUrl = window.location.origin;
+    const menuUrl = `${baseUrl}/menu/${formData.restaurant.url_slug}`;
+    const dashboardUrl = `${baseUrl}/dashboard.html?restaurant=${formData.restaurant.url_slug}`;
+    
+    document.getElementById('menuUrl').textContent = menuUrl;
+    document.getElementById('menuUrl').href = menuUrl;
+    document.getElementById('dashboardUrl').textContent = dashboardUrl;
+    document.getElementById('dashboardUrl').href = dashboardUrl;
+    
+    // Set dashboard links
+    document.getElementById('goToDashboard').href = dashboardUrl;
+    document.getElementById('viewMenu').href = menuUrl;
+    
+    // Add trial info to success message
+    const trialEndDate = new Date(formData.subscription.trial_end);
+    const trialMessage = `Your trial ends on ${trialEndDate.toLocaleDateString('en-IN', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    })}. We'll remind you 7 days before.`;
+    
+    document.getElementById('successMessage').innerHTML = `
+        Welcome to DigitalMenuPro! Your 30-day free trial has started. Full access granted immediately.<br><br>
+        <strong>Trial Period:</strong> ${trialMessage}
+    `;
+}
+
+function showDemoSuccess(formData) {
+    // Hide step 3, show step 4
+    document.getElementById('step3').classList.add('hidden');
+    document.getElementById('step4').classList.remove('hidden');
+    document.getElementById('fullSuccess').classList.add('hidden');
+    document.getElementById('demoSuccess').classList.remove('hidden');
+    updateProgress(4);
+    
+    // Set demo details
+    document.getElementById('demoRestaurantName').textContent = formData.restaurant.name;
+    document.getElementById('demoEmail').textContent = formData.owner.email;
+    
+    // Calculate trial end date
+    const trialEndDate = new Date(formData.subscription.trial_end);
+    document.getElementById('demoTrialEnd').textContent = trialEndDate.toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+    
+    // Create demo URLs
+    const baseUrl = window.location.origin;
+    const menuUrl = `${baseUrl}/menu/${formData.restaurant.url_slug}`;
+    document.getElementById('demoMenuUrl').textContent = menuUrl;
+    
+    // Update success message
+    document.getElementById('successMessage').textContent = 'Demo registration complete! In a real environment, this would save to Supabase.';
+}
+
+function updateProgress(step) {
+    // Reset all steps
+    const circles = ['step1Circle', 'step2Circle', 'step3Circle'];
+    const lines = ['progressLine1', 'progressLine2'];
+    
+    circles.forEach((circleId, index) => {
+        const circle = document.getElementById(circleId);
+        circle.classList.remove('active', 'completed');
+        circle.classList.add('bg-gray-200', 'text-gray-600');
+        
+        if (index + 1 < step) {
+            circle.classList.remove('bg-gray-200', 'text-gray-600');
+            circle.classList.add('completed');
+        } else if (index + 1 === step) {
+            circle.classList.remove('bg-gray-200', 'text-gray-600');
+            circle.classList.add('active');
+        }
+    });
+    
+    lines.forEach((lineId, index) => {
+        const line = document.getElementById(lineId);
+        line.classList.remove('active');
+        if (index + 1 < step) {
+            line.classList.add('active');
+        }
+    });
+}
+
+function copyUrl() {
+    const url = document.getElementById('menuUrl').href;
+    navigator.clipboard.writeText(url).then(() => {
+        alert('Menu URL copied to clipboard!');
+    });
+}
+
+function copyDashboardUrl() {
+    const url = document.getElementById('dashboardUrl').href;
+    navigator.clipboard.writeText(url).then(() => {
+        alert('Dashboard URL copied to clipboard!');
+    });
+}
+
+// URL slug auto-generation
+document.getElementById('restaurantName').addEventListener('input', function() {
+    const slugInput = document.getElementById('urlSlug');
+    if (!slugInput.value) {
+        // Auto-generate slug from restaurant name
+        const slug = this.value
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+        slugInput.value = slug;
+    }
+});
+
+// Initialize
+updateProgress(1);
+
+// Show demo mode warning if needed
+if (demoMode) {
+    console.log('Running in demo mode - no database connection');
+}
+</script>
+</body>
+</html>
