@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -382,4 +381,1587 @@
                             <span class="font-medium">View Order History (Name)</span>
                             <p class="text-xs text-gray-500">Can see past orders by customer name</p>
                         </div>
-                        <input type="checkbox" id="permViewOrderHistoryName" cl
+                        <input type="checkbox" id="permViewOrderHistoryName" class="w-5 h-5">
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <span class="font-medium">View Revenue</span>
+                            <p class="text-xs text-gray-500">Can see revenue statistics</p>
+                        </div>
+                        <input type="checkbox" id="permViewRevenue" class="w-5 h-5">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Status -->
+        <div class="mt-6 pt-6 border-t">
+            <h4 class="font-bold text-lg mb-3">User Status</h4>
+            <div class="flex items-center space-x-6">
+                <label class="flex items-center">
+                    <input type="radio" name="userStatus" value="active" checked class="mr-2">
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded">Active</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="userStatus" value="inactive" class="mr-2">
+                    <span class="px-3 py-1 bg-red-100 text-red-700 rounded">Inactive</span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="flex gap-3 pt-6">
+            <button onclick="savePermissions()" class="flex-1 bg-green-600 text-white py-3 rounded-lg font-medium">Save Permissions</button>
+            <button onclick="closeModal()" class="flex-1 bg-gray-300 py-3 rounded-lg">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Dish Modal with Image Selection -->
+<div id="modalDish" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <h3 class="text-2xl font-bold mb-6"><span id="dishTitle">Add</span> Dish</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Column: Dish Details -->
+            <div class="space-y-4">
+                <input type="hidden" id="dishId">
+                <input id="dishName" type="text" placeholder="Dish Name" class="w-full px-4 py-2 border rounded-lg">
+                <select id="dishCategory" class="w-full px-4 py-2 border rounded-lg">
+                    <option value="chinese">Chinese</option>
+                    <option value="fastfood">Fast Food</option>
+                    <option value="drinks">Drinks</option>
+                    <option value="soups">Soups</option>
+                </select>
+                <input id="dishPrice" type="number" placeholder="Price" class="w-full px-4 py-2 border rounded-lg">
+                <textarea id="dishDesc" placeholder="Description" rows="4" class="w-full px-4 py-2 border rounded-lg"></textarea>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="saveDish()" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">Save</button>
+                    <button onclick="closeModal()" class="flex-1 bg-gray-300 py-2 rounded-lg hover:bg-gray-400">Cancel</button>
+                </div>
+            </div>
+            
+            <!-- Right Column: Image Selection -->
+            <div>
+                <div class="mb-4">
+                    <label class="block font-medium mb-2">Select Image:</label>
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="text" id="imageSearch" placeholder="Search images..." 
+                               oninput="searchImages()" 
+                               class="flex-1 px-3 py-2 border rounded-lg">
+                        <button onclick="refreshImageGallery()" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Select an image from your gallery or use the default
+                    </div>
+                </div>
+                
+                <!-- Current Image Preview -->
+                <div id="currentImagePreview" class="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <label class="block font-medium mb-2">Selected Image:</label>
+                    <div class="flex items-center justify-center">
+                        <img id="selectedImagePreview" src="https://via.placeholder.com/300x200?text=No+Image" 
+                             class="w-full max-h-48 object-cover rounded-lg border-2 border-blue-500">
+                    </div>
+                    <div class="mt-2 text-center">
+                        <input type="hidden" id="selectedImageUrl">
+                        <button onclick="clearSelectedImage()" class="text-sm text-red-600 hover:text-red-800">
+                            <i class="fas fa-times mr-1"></i>Remove Image
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Image Gallery -->
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="font-medium">Available Images:</label>
+                        <span id="imageCount" class="text-sm text-gray-500">0 images</span>
+                    </div>
+                    <div id="imageGallery" class="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto p-2 bg-gray-50 rounded-lg">
+                        <!-- Images will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Default Image Option -->
+                <div class="border-t pt-4">
+                    <label class="font-medium mb-2 block">Or use default image:</label>
+                    <div class="flex flex-wrap gap-2" id="defaultImages">
+                        <!-- Default images will be added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalReservation" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl p-8 w-full max-w-md">
+        <h3 class="text-2xl font-bold mb-6">New Reservation</h3>
+        <div class="space-y-4">
+            <input id="resName" type="text" placeholder="Customer Name" class="w-full px-4 py-2 border rounded-lg">
+            <input id="resPhone" type="tel" placeholder="Phone" class="w-full px-4 py-2 border rounded-lg">
+            <input id="resDate" type="date" class="w-full px-4 py-2 border rounded-lg">
+            <input id="resTime" type="time" class="w-full px-4 py-2 border rounded-lg">
+            <input id="resGuests" type="number" placeholder="Guests" value="2" class="w-full px-4 py-2 border rounded-lg">
+            <select id="resTable" class="w-full px-4 py-2 border rounded-lg"></select>
+            <div class="flex gap-3">
+                <button onclick="saveReservation()" class="flex-1 bg-purple-600 text-white py-2 rounded-lg">Save</button>
+                <button onclick="closeModal()" class="flex-1 bg-gray-300 py-2 rounded-lg">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Configuration - REPLACE WITH YOUR ACTUAL CREDENTIALS
+const SUPABASE_URL = 'https://aazqyrkklajqscsdfgjl.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhenF5cmtrbGFqcXNjc2RmZ2psIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NTg4MjUsImV4cCI6MjA4NDMzNDgyNX0.MCmhASRpt_N1gkK7BiVBzp4NT98aCWOWetgtUCoj7Go';
+
+// Initialize Supabase
+let supabaseClient;
+
+try {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✓ Supabase initialized successfully');
+} catch (error) {
+    console.error('Supabase initialization error:', error);
+}
+
+// Change the init() function order:
+async function init() {
+    // 1. FIRST load and show menu (non-blocking)
+    await loadInitialData();
+    renderCustomerMenu();  // SHOW MENU IMMEDIATELY
+    
+    // 2. THEN check login status (in background)
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+        await handleSession(user);
+    }
+}
+
+// Global variables
+let currentUser = null,
+    users = [],
+    dishes = [],
+    orders = [],
+    reservations = [],
+    tables = [],
+    historyFilter = 'table',
+    editingUserId = null,
+    editingDishId = null,
+    availableImages = [],
+    defaultImages = [
+        { url: 'https://via.placeholder.com/300x200/FF6B6B/FFFFFF?text=Chinese', name: 'Chinese Dish' },
+        { url: 'https://via.placeholder.com/300x200/4ECDC4/FFFFFF?text=Fast+Food', name: 'Fast Food' },
+        { url: 'https://via.placeholder.com/300x200/45B7D1/FFFFFF?text=Drink', name: 'Drink' },
+        { url: 'https://via.placeholder.com/300x200/96CEB4/FFFFFF?text=Soup', name: 'Soup' },
+        { url: 'https://via.placeholder.com/300x200/FFEAA7/000000?text=Dessert', name: 'Dessert' },
+        { url: 'https://via.placeholder.com/300x200/DDA0DD/FFFFFF?text=Appetizer', name: 'Appetizer' }
+    ];
+
+// Initialize application
+async function init() {
+    try {
+        console.log('🚀 Initializing application...');
+        
+        // Check if user is already logged in
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (user) {
+            console.log('✓ User already logged in:', user.email);
+            await handleSession(user);
+        }
+        
+        // Load initial data
+        await loadInitialData();
+        renderCustomerMenu();
+        
+        console.log('✓ Application initialized successfully');
+    } catch (error) {
+        console.error('❌ Initialization error:', error);
+    }
+}
+
+async function loadInitialData() {
+    try {
+        console.log('📊 Loading data from Supabase...');
+        
+        // Load dishes from Supabase
+        const { data: dishesData, error: dishesError } = await supabaseClient
+            .from('dishes')
+            .select('*')
+            .eq('is_active', true);
+        
+        if (dishesError) {
+            console.error('Dishes error:', dishesError);
+        } else {
+            dishes = dishesData || [];
+            console.log(`✓ Loaded ${dishes.length} dishes`);
+        }
+        
+        // Load tables
+        tables = Array.from({length: 15}, (_, i) => ({
+            id: `t${i+1}`,
+            number: i + 1,
+            capacity: i < 5 ? 2 : i < 10 ? 4 : 6,
+            status: 'free'
+        }));
+        console.log(`✓ Initialized ${tables.length} tables`);
+        
+        // Load reservations
+        const { data: reservationsData, error: resError } = await supabaseClient
+            .from('reservations')
+            .select('*');
+        
+        if (resError) {
+            console.error('Reservations error:', resError);
+        } else {
+            reservations = reservationsData || [];
+            console.log(`✓ Loaded ${reservations.length} reservations`);
+        }
+        
+        // Load orders
+        const { data: ordersData, error: ordersError } = await supabaseClient
+            .from('orders')
+            .select('*');
+        
+        if (ordersError) {
+            console.error('Orders error:', ordersError);
+        } else {
+            orders = ordersData || [];
+            console.log(`✓ Loaded ${orders.length} orders`);
+        }
+        
+        // Load staff users
+        const { data: usersData, error: usersError } = await supabaseClient
+            .from('staff_users')
+            .select('*');
+        
+        if (usersError) {
+            console.error('Users error:', usersError);
+        } else {
+            users = usersData || [];
+            console.log(`✓ Loaded ${users.length} staff users`);
+        }
+        
+        updateStats();
+    } catch (error) {
+        console.error('❌ Error loading data:', error);
+    }
+}
+
+// Staff authentication
+async function handleStaffLogin() {
+    const email = document.getElementById('staffEmail').value;
+    const password = document.getElementById('staffPassword').value;
+    
+    if (!email || !password) {
+        alert('Please enter email and password');
+        return;
+    }
+    
+    try {
+        console.log('🔐 Attempting login for:', email);
+        
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+        
+        if (error) throw error;
+        
+        console.log('✓ Login successful');
+        await handleSession(data.user);
+        alert('✓ Login successful!');
+    } catch (error) {
+        console.error('❌ Login error:', error);
+        alert('✗ Login failed: ' + error.message);
+    }
+}
+
+async function handleSession(user) {
+    try {
+        console.log('👤 Loading user session for:', user.email);
+        
+        // Get staff user data from database
+        const { data: staffUser, error } = await supabaseClient
+            .from('staff_users')
+            .select('*')
+            .eq('email', user.email)
+            .single();
+        
+        if (error || !staffUser) {
+            console.error('Staff user not found:', error);
+            alert('Staff account not found. Please contact administrator.');
+            await supabaseClient.auth.signOut();
+            return;
+        }
+        
+        if (!staffUser.is_active) {
+            alert('This account is disabled. Please contact administrator.');
+            await supabaseClient.auth.signOut();
+            return;
+        }
+        
+        currentUser = {
+            ...staffUser,
+            supabaseUser: user
+        };
+        
+        console.log('✓ User session loaded:', currentUser.role);
+        
+        closeStaffLoginModal();
+        document.getElementById('customerView').classList.add('hidden');
+        document.getElementById('staffDashboard').classList.remove('hidden');
+        
+        document.getElementById('staffUserName').textContent = currentUser.name;
+        document.getElementById('staffUserRole').textContent = currentUser.role.toUpperCase();
+        document.getElementById('staffUserEmail').textContent = currentUser.email;
+        
+        setupNav();
+        showView('dashboard');
+    } catch (error) {
+        console.error('❌ Session error:', error);
+        alert('Error loading user session: ' + error.message);
+    }
+}
+
+async function handleLogout() {
+    try {
+        console.log('👋 Logging out...');
+        await supabaseClient.auth.signOut();
+        currentUser = null;
+        document.getElementById('staffDashboard').classList.add('hidden');
+        document.getElementById('customerView').classList.remove('hidden');
+        console.log('✓ Logout successful');
+    } catch (error) {
+        console.error('❌ Logout error:', error);
+    }
+}
+
+function showStaffLogin() {
+    document.getElementById('staffLoginModal').classList.remove('hidden');
+}
+
+function closeStaffLoginModal() {
+    document.getElementById('staffLoginModal').classList.add('hidden');
+}
+
+function closeCustomerReservationModal() {
+    document.getElementById('reservationModal').classList.add('hidden');
+}
+
+function hasPermission(p) {
+    if (!currentUser) return false;
+    return currentUser.role === 'admin' || (currentUser.permissions && currentUser.permissions[p]);
+}
+
+function setupNav() {
+    let nav = '<button onclick="showView(\'dashboard\')" class="px-4 py-2 rounded-lg hover:bg-gray-100"><i class="fas fa-home mr-2"></i>Dashboard</button>';
+    
+    if (currentUser.role === 'admin') {
+        nav += '<button onclick="showView(\'users\')" class="px-4 py-2 rounded-lg hover:bg-gray-100"><i class="fas fa-users mr-2"></i>Users</button>';
+    }
+    
+    if (hasPermission('addDish') || hasPermission('editDish') || hasPermission('deleteDish')) {
+        nav += '<button onclick="showView(\'dishes\')" class="px-4 py-2 rounded-lg hover:bg-gray-100"><i class="fas fa-utensils mr-2"></i>Dishes</button>';
+    }
+    
+    if (hasPermission('reserveTable')) {
+        nav += '<button onclick="showView(\'reservations\')" class="px-4 py-2 rounded-lg hover:bg-gray-100"><i class="fas fa-calendar mr-2"></i>Reservations</button>';
+    }
+    
+    if (hasPermission('viewTableOrders')) {
+        nav += '<button onclick="showView(\'orders\')" class="px-4 py-2 rounded-lg hover:bg-gray-100"><i class="fas fa-clipboard-list mr-2"></i>Orders</button>';
+    }
+    
+    if (hasPermission('viewOrderHistoryTable') || hasPermission('viewOrderHistoryName')) {
+        nav += '<button onclick="showView(\'history\')" class="px-4 py-2 rounded-lg hover:bg-gray-100"><i class="fas fa-history mr-2"></i>History</button>';
+    }
+    
+    document.getElementById('staffNavMenu').innerHTML = nav;
+}
+
+function showView(v) {
+    document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
+    document.getElementById('view' + v.charAt(0).toUpperCase() + v.slice(1)).classList.remove('hidden');
+    
+    if (v === 'users') renderUsers();
+    if (v === 'dishes') renderDishes();
+    if (v === 'orders') renderOrders();
+    if (v === 'reservations') renderReservations();
+    if (v === 'history') renderHistory();
+    if (v === 'dashboard') {
+        updateStats();
+        updateRevenueStats();
+    }
+}
+
+function updateStats() {
+    document.getElementById('statUsers').textContent = users.length;
+    document.getElementById('statDishes').textContent = dishes.filter(d => d.is_active).length;
+    document.getElementById('statOrders').textContent = orders.length;
+    const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+    document.getElementById('statRevenue').textContent = '₹' + totalRevenue;
+    
+    if (hasPermission('viewRevenue')) {
+        document.getElementById('revenueStats').classList.remove('hidden');
+    } else {
+        document.getElementById('revenueStats').classList.add('hidden');
+    }
+}
+
+function updateRevenueStats() {
+    if (!hasPermission('viewRevenue')) return;
+    
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    
+    const todayRevenue = orders
+        .filter(o => o.created_at && new Date(o.created_at).toISOString().split('T')[0] === today)
+        .reduce((sum, o) => sum + (o.total || 0), 0);
+    
+    const weeklyRevenue = orders
+        .filter(o => o.created_at && new Date(o.created_at) >= oneWeekAgo)
+        .reduce((sum, o) => sum + (o.total || 0), 0);
+    
+    const monthlyRevenue = orders
+        .filter(o => o.created_at && new Date(o.created_at) >= oneMonthAgo)
+        .reduce((sum, o) => sum + (o.total || 0), 0);
+    
+    document.getElementById('todayRevenue').textContent = todayRevenue;
+    document.getElementById('weeklyRevenue').textContent = weeklyRevenue;
+    document.getElementById('monthlyRevenue').textContent = monthlyRevenue;
+}
+
+function showModal(type) {
+    if (type === 'permissions') {
+        document.getElementById('modalPermissions').classList.remove('hidden');
+    } else {
+        const modalId = 'modal' + type.charAt(0).toUpperCase() + type.slice(1);
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    }
+    
+    if (type === 'reservation') {
+        let opts = '<option value="">Select Table</option>';
+        tables.forEach(t => {
+            opts += `<option value="${t.number}">Table ${t.number} (${t.capacity} seats)</option>`;
+        });
+        document.getElementById('resTable').innerHTML = opts;
+        
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('resDate').value = tomorrow.toISOString().split('T')[0];
+    }
+    
+    if (type === 'dish') {
+        // Load images and render gallery
+        loadImagesFromSupabase().then(() => {
+            renderImageGallery();
+            renderDefaultImages();
+            
+            // Reset selection
+            clearSelectedImage();
+        });
+    }
+}
+
+function closeModal() {
+    document.querySelectorAll('[id^="modal"]').forEach(el => el.classList.add('hidden'));
+    editingUserId = null;
+    editingDishId = null;
+    
+    // Reset dish form
+    const dishIdInput = document.getElementById('dishId');
+    if (dishIdInput) dishIdInput.value = '';
+    
+    const dishTitle = document.getElementById('dishTitle');
+    if (dishTitle) dishTitle.textContent = 'Add';
+    
+    // Reset form fields
+    const formFields = ['dishName', 'dishPrice', 'dishDesc', 'staffName', 'staffEmailInput', 'staffPasswordInput', 'resName', 'resPhone', 'resGuests'];
+    formFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) field.value = '';
+    });
+}
+
+// Function to load images from Supabase Storage
+async function loadImagesFromSupabase() {
+    try {
+        console.log('📸 Loading images from Supabase Storage...');
+        
+        // List files in the dish-images bucket
+        const { data, error } = await supabaseClient.storage
+            .from('dish-images')
+            .list('', {
+                limit: 100,
+                offset: 0,
+                sortBy: { column: 'name', order: 'asc' }
+            });
+        
+        if (error) throw error;
+        
+        // Filter out folders and get image URLs
+        availableImages = await Promise.all(
+            data
+                .filter(item => !item.id.endsWith('/')) // Exclude folders
+                .map(async (item) => {
+                    const { data: { publicUrl } } = supabaseClient.storage
+                        .from('dish-images')
+                        .getPublicUrl(item.name);
+                    
+                    return {
+                        name: item.name,
+                        url: publicUrl,
+                        created_at: item.created_at
+                    };
+                })
+        );
+        
+        console.log(`✓ Loaded ${availableImages.length} images from storage`);
+        return availableImages;
+    } catch (error) {
+        console.error('❌ Error loading images:', error);
+        return [];
+    }
+}
+
+// Function to render image gallery
+function renderImageGallery(images = availableImages) {
+    const gallery = document.getElementById('imageGallery');
+    const countSpan = document.getElementById('imageCount');
+    
+    if (!gallery) return;
+    
+    countSpan.textContent = `${images.length} images`;
+    
+    if (images.length === 0) {
+        gallery.innerHTML = `
+            <div class="col-span-3 text-center py-4">
+                <i class="fas fa-image text-3xl text-gray-300 mb-2"></i>
+                <p class="text-gray-500">No images found</p>
+            </div>
+        `;
+        return;
+    }
+    
+    gallery.innerHTML = images.map(img => `
+        <div class="relative group">
+            <img src="${img.url}" 
+                 alt="${img.name}"
+                 onclick="selectImage('${img.url}', '${img.name}')"
+                 class="image-thumbnail w-full h-24 object-cover rounded-lg">
+            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                <button onclick="selectImage('${img.url}', '${img.name}')" 
+                        class="px-3 py-1 bg-white text-gray-800 rounded text-sm font-medium hover:bg-gray-100">
+                    Select
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Function to render default images
+function renderDefaultImages() {
+    const container = document.getElementById('defaultImages');
+    if (!container) return;
+    
+    container.innerHTML = defaultImages.map(img => `
+        <div class="text-center">
+            <img src="${img.url}" 
+                 alt="${img.name}"
+                 onclick="selectDefaultImage('${img.url}')"
+                 class="default-image w-24 h-20 object-cover rounded-lg mb-1">
+            <p class="text-xs text-gray-600">${img.name}</p>
+        </div>
+    `).join('');
+}
+
+// Function to select an image
+function selectImage(url, name) {
+    // Remove selection from all images
+    document.querySelectorAll('.image-thumbnail').forEach(img => {
+        img.classList.remove('selected');
+    });
+    
+    // Remove selection from default images
+    document.querySelectorAll('.default-image').forEach(img => {
+        img.classList.remove('selected');
+    });
+    
+    // Add selection to clicked image
+    const clickedImage = document.querySelector(`img[src="${url}"]`);
+    if (clickedImage) {
+        clickedImage.classList.add('selected');
+    }
+    
+    // Update selected image preview
+    document.getElementById('selectedImagePreview').src = url;
+    document.getElementById('selectedImageUrl').value = url;
+    
+    console.log(`Selected image: ${name}`);
+}
+
+// Function to select default image
+function selectDefaultImage(url) {
+    // Remove selection from all images
+    document.querySelectorAll('.image-thumbnail').forEach(img => {
+        img.classList.remove('selected');
+    });
+    
+    document.querySelectorAll('.default-image').forEach(img => {
+        img.classList.remove('selected');
+    });
+    
+    // Add selection to clicked default image
+    const clickedImage = document.querySelector(`img[src="${url}"]`);
+    if (clickedImage) {
+        clickedImage.classList.add('selected');
+    }
+    
+    // Update selected image preview
+    document.getElementById('selectedImagePreview').src = url;
+    document.getElementById('selectedImageUrl').value = url;
+}
+
+// Function to clear selected image
+function clearSelectedImage() {
+    // Clear selection
+    document.querySelectorAll('.image-thumbnail, .default-image').forEach(img => {
+        img.classList.remove('selected');
+    });
+    
+    // Reset to default placeholder
+    document.getElementById('selectedImagePreview').src = 'https://via.placeholder.com/300x200?text=No+Image';
+    document.getElementById('selectedImageUrl').value = '';
+}
+
+// Function to search images
+function searchImages() {
+    const searchTerm = document.getElementById('imageSearch').value.toLowerCase();
+    
+    if (!searchTerm) {
+        renderImageGallery(availableImages);
+        return;
+    }
+    
+    const filteredImages = availableImages.filter(img => 
+        img.name.toLowerCase().includes(searchTerm)
+    );
+    
+    renderImageGallery(filteredImages);
+}
+
+// Function to refresh image gallery
+async function refreshImageGallery() {
+    await loadImagesFromSupabase();
+    renderImageGallery();
+    alert('Image gallery refreshed!');
+}
+
+async function saveUser() {
+    const name = document.getElementById('staffName').value;
+    const email = document.getElementById('staffEmailInput').value;
+    const password = document.getElementById('staffPasswordInput').value;
+    const roleInput = document.querySelector('input[name="userRole"]:checked');
+    
+    if (!roleInput) {
+        alert('Please select a role');
+        return;
+    }
+    
+    const role = roleInput.value;
+    
+    if (!name || !email || !password) {
+        alert('Please fill all fields');
+        return;
+    }
+    
+    try {
+        console.log('Creating new user:', email);
+        
+        // Create auth user
+        const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+            email: email,
+            password: password
+        });
+        
+        if (authError) throw authError;
+        
+        // Create staff user in database
+        const newUser = {
+            name: name,
+            email: email,
+            role: role,
+            is_active: true,
+            permissions: getDefaultPermissions(role)
+        };
+        
+        const { data: userData, error: userError } = await supabaseClient
+            .from('staff_users')
+            .insert([newUser])
+            .select()
+            .single();
+        
+        if (userError) throw userError;
+        
+        users.push(userData);
+        closeModal();
+        renderUsers();
+        updateStats();
+        alert('User added successfully!');
+        console.log('✓ User created successfully');
+    } catch (error) {
+        console.error('❌ Error saving user:', error);
+        alert('Error: ' + error.message);
+    }
+}
+
+function getDefaultPermissions(role) {
+    const defaultPerms = {
+        addDish: false,
+        editDish: false,
+        deleteDish: false,
+        reserveTable: false,
+        viewTableOrders: false,
+        viewOrderHistoryTable: false,
+        viewOrderHistoryName: false,
+        viewRevenue: false
+    };
+    
+    switch(role) {
+        case 'manager':
+            return {
+                ...defaultPerms,
+                addDish: true,
+                editDish: true,
+                reserveTable: true,
+                viewTableOrders: true,
+                viewOrderHistoryTable: true,
+                viewOrderHistoryName: true,
+                viewRevenue: true
+            };
+        case 'chef':
+            return {
+                ...defaultPerms,
+                viewTableOrders: true
+            };
+        case 'waiter':
+            return {
+                ...defaultPerms,
+                reserveTable: true,
+                viewTableOrders: true
+            };
+        default:
+            return defaultPerms;
+    }
+}
+
+async function renderUsers() {
+    try {
+        const { data: usersData, error } = await supabaseClient
+            .from('staff_users')
+            .select('*')
+            .neq('role', 'admin');
+        
+        if (error) throw error;
+        
+        users = usersData || [];
+        
+        let html = '';
+        users.forEach(user => {
+            const permissions = user.permissions || {};
+            html += `
+                <div class="bg-white p-4 rounded-xl shadow">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <h3 class="font-bold">${user.name}</h3>
+                                <span class="px-2 py-1 rounded ${user.role === 'manager' ? 'bg-purple-100 text-purple-700' : user.role === 'chef' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">
+                                    ${user.role.toUpperCase()}
+                                </span>
+                                <span class="px-2 py-1 rounded ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                                    ${user.is_active ? 'Active' : 'Inactive'}
+                                </span>
+                            </div>
+                            <p class="text-gray-600 text-sm">${user.email}</p>
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                ${Object.entries(permissions).map(([key, value]) => 
+                                    value ? `<span class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">${formatPermissionName(key)}</span>` : ''
+                                ).join('')}
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <button onclick="editPermissions('${user.id}')" class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                <i class="fas fa-key mr-1"></i>Permissions
+                            </button>
+                            <button onclick="toggleUserStatus('${user.id}')" class="px-3 py-2 ${user.is_active ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'} text-white rounded">
+                                ${user.is_active ? 'Disable' : 'Enable'}
+                            </button>
+                            <button onclick="deleteUser('${user.id}')" class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        document.getElementById('usersList').innerHTML = html || '<p class="text-gray-500 text-center py-8">No staff members found.</p>';
+    } catch (error) {
+        console.error('❌ Error loading users:', error);
+        document.getElementById('usersList').innerHTML = '<p class="text-red-500">Error loading users</p>';
+    }
+}
+
+function formatPermissionName(key) {
+    const names = {
+        addDish: 'Add Dish',
+        editDish: 'Edit Dish',
+        deleteDish: 'Delete Dish',
+        reserveTable: 'Reserve Table',
+        viewTableOrders: 'View Orders',
+        viewOrderHistoryTable: 'History (Table)',
+        viewOrderHistoryName: 'History (Name)',
+        viewRevenue: 'View Revenue'
+    };
+    return names[key] || key;
+}
+
+function editPermissions(userId) {
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    
+    editingUserId = userId;
+    document.getElementById('permissionsUserName').textContent = user.name;
+    
+    const roleInput = document.querySelector(`input[name="editUserRole"][value="${user.role}"]`);
+    if (roleInput) roleInput.checked = true;
+    
+    const permissions = user.permissions || {};
+    
+    document.getElementById('permAddDish').checked = permissions.addDish || false;
+    document.getElementById('permEditDish').checked = permissions.editDish || false;
+    document.getElementById('permDeleteDish').checked = permissions.deleteDish || false;
+    document.getElementById('permReserveTable').checked = permissions.reserveTable || false;
+    document.getElementById('permViewTableOrders').checked = permissions.viewTableOrders || false;
+    document.getElementById('permViewOrderHistoryTable').checked = permissions.viewOrderHistoryTable || false;
+    document.getElementById('permViewOrderHistoryName').checked = permissions.viewOrderHistoryName || false;
+    document.getElementById('permViewRevenue').checked = permissions.viewRevenue || false;
+    
+    const statusInput = document.querySelector(`input[name="userStatus"][value="${user.is_active ? 'active' : 'inactive'}"]`);
+    if (statusInput) statusInput.checked = true;
+    
+    showModal('permissions');
+}
+
+async function savePermissions() {
+    if (!editingUserId) return;
+    
+    try {
+        const user = users.find(u => u.id === editingUserId);
+        if (!user) return;
+        
+        const roleInput = document.querySelector('input[name="editUserRole"]:checked');
+        const statusInput = document.querySelector('input[name="userStatus"]:checked');
+        
+        if (!roleInput || !statusInput) {
+            alert('Please select role and status');
+            return;
+        }
+        
+        const newRole = roleInput.value;
+        const userStatus = statusInput.value;
+        
+        const updatedUser = {
+            role: newRole,
+            is_active: userStatus === 'active',
+            permissions: {
+                addDish: document.getElementById('permAddDish').checked,
+                editDish: document.getElementById('permEditDish').checked,
+                deleteDish: document.getElementById('permDeleteDish').checked,
+                reserveTable: document.getElementById('permReserveTable').checked,
+                viewTableOrders: document.getElementById('permViewTableOrders').checked,
+                viewOrderHistoryTable: document.getElementById('permViewOrderHistoryTable').checked,
+                viewOrderHistoryName: document.getElementById('permViewOrderHistoryName').checked,
+                viewRevenue: document.getElementById('permViewRevenue').checked
+            }
+        };
+        
+        const { error } = await supabaseClient
+            .from('staff_users')
+            .update(updatedUser)
+            .eq('id', editingUserId);
+        
+        if (error) throw error;
+        
+        Object.assign(user, updatedUser);
+        
+        if (currentUser && currentUser.id === editingUserId) {
+            Object.assign(currentUser, updatedUser);
+            setupNav();
+            showView('dashboard');
+        }
+        
+        closeModal();
+        renderUsers();
+        alert('Permissions updated successfully!');
+    } catch (error) {
+        console.error('❌ Error saving permissions:', error);
+        alert('Error: ' + error.message);
+    }
+}
+
+async function toggleUserStatus(userId) {
+    try {
+        const user = users.find(u => u.id === userId);
+        if (!user) return;
+        
+        const newStatus = !user.is_active;
+        
+        const { error } = await supabaseClient
+            .from('staff_users')
+            .update({ is_active: newStatus })
+            .eq('id', userId);
+        
+        if (error) throw error;
+        
+        user.is_active = newStatus;
+        renderUsers();
+        alert(`User ${newStatus ? 'enabled' : 'disabled'}!`);
+    } catch (error) {
+        console.error('❌ Error toggling user status:', error);
+        alert('Error: ' + error.message);
+    }
+}
+
+async function deleteUser(id) {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+    
+    try {
+        const { error } = await supabaseClient
+            .from('staff_users')
+            .delete()
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        users = users.filter(u => u.id !== id);
+        renderUsers();
+        updateStats();
+        alert('User deleted successfully!');
+    } catch (error) {
+        console.error('❌ Error deleting user:', error);
+        alert('Error: ' + error.message);
+    }
+}
+
+function renderCustomerMenu() {
+    let html = '';
+    dishes.forEach(dish => {
+        if (!dish.is_active) return;
+        
+        html += `
+            <div class="bg-white rounded-xl shadow overflow-hidden hover:shadow-lg transition-shadow">
+                <img src="${dish.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}" alt="${dish.name}" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-lg">${dish.name}</h3>
+                        <span class="font-bold text-red-600">₹${dish.price}</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3">${dish.description || ''}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">${dish.category}</span>
+                        <button onclick="showReservationModal()" class="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm">
+                            Book Table
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    document.getElementById('customerMenuList').innerHTML = html || '<p class="text-gray-500 text-center py-8 col-span-4">No dishes available.</p>';
+}
+
+function showReservationModal() {
+    const modal = document.getElementById('reservationModal');
+    modal.classList.remove('hidden');
+    
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('custDate').value = tomorrow.toISOString().split('T')[0];
+    
+    const nextHour = new Date();
+    nextHour.setHours(nextHour.getHours() + 1);
+    document.getElementById('custTime').value = nextHour.getHours().toString().padStart(2, '0') + ':00';
+    
+    let opts = '<option value="">Select Table Size</option>';
+    const tableSizes = [
+        { size: 2, label: '2 Seater (Small)' },
+        { size: 4, label: '4 Seater (Medium)' },
+        { size: 6, label: '6 Seater (Large)' }
+    ];
+    tableSizes.forEach(t => {
+        opts += `<option value="${t.size}">${t.label}</option>`;
+    });
+    document.getElementById('custTable').innerHTML = opts;
+}
+
+async function submitCustomerReservation() {
+    const name = document.getElementById('custName').value;
+    const email = document.getElementById('custEmail').value;
+    const phone = document.getElementById('custPhone').value;
+    const date = document.getElementById('custDate').value;
+    const time = document.getElementById('custTime').value;
+    const guests = parseInt(document.getElementById('custGuests').value);
+    const tableSize = parseInt(document.getElementById('custTable').value);
+    
+    if (!name || !email || !phone || !date || !time || !guests || !tableSize) {
+        alert('Please fill all fields');
+        return;
+    }
+    
+    const table = tables.find(t => t.capacity >= guests && t.status === 'free');
+    
+    if (!table) {
+        alert('Sorry, no tables available for that size. Please try a different time or contact us.');
+        return;
+    }
+    
+    try {
+        const reservation = {
+            table_number: table.number,
+            customer_name: name,
+            customer_email: email,
+            customer_phone: phone,
+            date: date,
+            time: time,
+            guest_count: guests,
+            status: 'pending',
+            type: 'customer'
+        };
+        
+        const { data, error } = await supabaseClient
+            .from('reservations')
+            .insert([reservation])
+            .select()
+            .single();
+        
+        if (error) throw error;
+        
+        reservations.push(data);
+        table.status = 'reserved';
+        
+        closeCustomerReservationModal();
+        alert('Thank you! Your table reservation request has been submitted. We will confirm shortly.');
+        
+        // Clear form
+        document.getElementById('custName').value = '';
+        document.getElementById('custEmail').value = '';
+        document.getElementById('custPhone').value = '';
+        document.getElementById('custGuests').value = '2';
+    } catch (error) {
+        console.error('❌ Error creating reservation:', error);
+        alert('Error submitting reservation: ' + error.message);
+    }
+}
+
+async function renderDishes() {
+    try {
+        const { data: dishesData, error } = await supabaseClient
+            .from('dishes')
+            .select('*')
+            .eq('is_active', true);
+        
+        if (error) throw error;
+        
+        dishes = dishesData || [];
+        
+        let html = '';
+        dishes.forEach(dish => {
+            html += `
+                <div class="bg-white rounded-xl shadow overflow-hidden">
+                    <img src="${dish.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}" alt="${dish.name}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg">${dish.name}</h3>
+                                <p class="text-gray-600 text-sm">${dish.description || ''}</p>
+                            </div>
+                            <span class="font-bold text-lg">₹${dish.price}</span>
+                        </div>
+                        <div class="flex justify-between mt-4">
+                            <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">${dish.category}</span>
+                            <div class="flex gap-2">
+                                ${hasPermission('editDish') ? `<button onclick="editDish('${dish.id}')" class="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">Edit</button>` : ''}
+                                ${hasPermission('deleteDish') ? `<button onclick="deleteDish('${dish.id}')" class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200">Delete</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        document.getElementById('dishesList').innerHTML = html || '<p class="text-gray-500 text-center py-8 col-span-3">No dishes available.</p>';
+    } catch (error) {
+        console.error('❌ Error loading dishes:', error);
+        document.getElementById('dishesList').innerHTML = '<p class="text-red-500">Error loading dishes</p>';
+    }
+}
+
+// Update the editDish function
+async function editDish(id) {
+    const dish = dishes.find(d => d.id === id);
+    if (dish) {
+        editingDishId = id;
+        document.getElementById('dishId').value = dish.id;
+        document.getElementById('dishName').value = dish.name;
+        document.getElementById('dishCategory').value = dish.category;
+        document.getElementById('dishPrice').value = dish.price;
+        document.getElementById('dishDesc').value = dish.description || '';
+        document.getElementById('dishTitle').textContent = 'Edit';
+        
+        // Load images before showing modal
+        await loadImagesFromSupabase();
+        renderImageGallery();
+        renderDefaultImages();
+        
+        // Set current image if exists
+        if (dish.image_url) {
+            document.getElementById('selectedImagePreview').src = dish.image_url;
+            document.getElementById('selectedImageUrl').value = dish.image_url;
+            
+            // Find and highlight the selected image in gallery
+            const selectedImage = availableImages.find(img => img.url === dish.image_url);
+            if (selectedImage) {
+                // We'll select it after a small delay to ensure DOM is ready
+                setTimeout(() => {
+                    selectImage(dish.image_url, selectedImage.name);
+                }, 100);
+            } else {
+                // Check if it's a default image
+                const isDefault = defaultImages.find(img => img.url === dish.image_url);
+                if (isDefault) {
+                    setTimeout(() => {
+                        selectDefaultImage(dish.image_url);
+                    }, 100);
+                }
+            }
+        }
+        
+        showModal('dish');
+    }
+}
+
+// Update the saveDish function to use selected image
+async function saveDish() {
+    const name = document.getElementById('dishName').value;
+    const category = document.getElementById('dishCategory').value;
+    const price = parseFloat(document.getElementById('dishPrice').value);
+    const description = document.getElementById('dishDesc').value;
+    const imageUrl = document.getElementById('selectedImageUrl').value;
+    const dishId = document.getElementById('dishId').value;
+    
+    if (!name || !category || !price || !description) {
+        alert('Please fill all required fields');
+        return;
+    }
+    
+    try {
+        const dishData = {
+            name: name,
+            category: category,
+            price: price,
+            description: description,
+            is_active: true
+        };
+        
+        // Use selected image or default placeholder
+        if (imageUrl) {
+            dishData.image_url = imageUrl;
+        } else {
+            dishData.image_url = 'https://via.placeholder.com/300x200?text=No+Image';
+        }
+        
+        let result;
+        if (dishId) {
+            // Update existing dish
+            const { data, error } = await supabaseClient
+                .from('dishes')
+                .update(dishData)
+                .eq('id', dishId)
+                .select()
+                .single();
+            
+            if (error) throw error;
+            result = data;
+        } else {
+            // Create new dish
+            const { data, error } = await supabaseClient
+                .from('dishes')
+                .insert([dishData])
+                .select()
+                .single();
+            
+            if (error) throw error;
+            result = data;
+        }
+        
+        // Update local dishes array
+        const index = dishes.findIndex(d => d.id === result.id);
+        if (index !== -1) {
+            dishes[index] = result;
+        } else {
+            dishes.push(result);
+        }
+        
+        closeModal();
+        renderDishes();
+        renderCustomerMenu();
+        updateStats();
+        alert('Dish saved successfully!');
+    } catch (error) {
+        console.error('❌ Error saving dish:', error);
+        alert('Error: ' + error.message);
+    }
+}
+
+async function deleteDish(id) {
+    if (!confirm('Are you sure you want to delete this dish?')) return;
+    
+    try {
+        const { error } = await supabaseClient
+            .from('dishes')
+            .update({ is_active: false })
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        const dish = dishes.find(d => d.id === id);
+        if (dish) dish.is_active = false;
+        
+        renderDishes();
+        renderCustomerMenu();
+        updateStats();
+        alert('Dish deleted successfully!');
+    } catch (error) {
+        console.error('❌ Error deleting dish:', error);
+        alert('Error: ' + error.message);
+    }
+}
+
+async function saveReservation() {
+    const name = document.getElementById('resName').value;
+    const phone = document.getElementById('resPhone').value;
+    const date = document.getElementById('resDate').value;
+    const time = document.getElementById('resTime').value;
+    const guests = parseInt(document.getElementById('resGuests').value);
+    const tableNumber = parseInt(document.getElementById('resTable').value);
+    
+    if (!name || !phone || !date || !time || !guests || !tableNumber) {
+        alert('Please fill all fields');
+        return;
+    }
+    
+    try {
+        const reservation = {
+            table_number: tableNumber,
+            customer_name: name,
+            customer_phone: phone,
+            date: date,
+            time: time,
+            guest_count: guests,
+            status: 'confirmed'
+        };
+        
+        const { data, error } = await supabaseClient
+            .from('reservations')
+            .insert([reservation])
+            .select()
+            .single();
+        
+        if (error) throw error;
+        
+        const table = tables.find(t => t.number === tableNumber);
+        if (table) table.status = 'reserved';
+        
+        reservations.push(data);
+        closeModal();
+        renderReservations();
+        alert('Reservation created successfully!');
+    } catch (error) {
+        console.error('❌ Error creating reservation:', error);
+        alert('Error: ' + error.message);
+    }
+}
+
+async function renderReservations() {
+    try {
+        const { data: reservationsData, error } = await supabaseClient
+            .from('reservations')
+            .select('*')
+            .order('date', { ascending: true });
+        
+        if (error) throw error;
+        
+        reservations = reservationsData || [];
+        
+        let html = '';
+        reservations.forEach(res => {
+            html += `
+                <div class="bg-white p-4 rounded-xl shadow">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold">${res.customer_name}</h3>
+                            <p class="text-gray-600 text-sm">Table ${res.table_number} • ${res.guest_count} guests</p>
+                            <p class="text-gray-600 text-sm">${res.date} at ${res.time}</p>
+                            ${res.customer_email ? `<p class="text-gray-600 text-sm">${res.customer_email}</p>` : ''}
+                            ${res.customer_phone ? `<p class="text-gray-600 text-sm">${res.customer_phone}</p>` : ''}
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="px-3 py-1 ${res.status === 'confirmed' ? 'bg-green-100 text-green-700' : res.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'} rounded">
+                                ${res.status}
+                            </span>
+                            ${res.status !== 'cancelled' ? `<button onclick="cancelReservation('${res.id}')" class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200">Cancel</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        document.getElementById('reservationsList').innerHTML = html || '<p class="text-gray-500 text-center py-8">No reservations found.</p>';
+    } catch (error) {
+        console.error('❌ Error loading reservations:', error);
+        document.getElementById('reservationsList').innerHTML = '<p class="text-red-500">Error loading reservations</p>';
+    }
+}
+
+async function cancelReservation(id) {
+    if (!confirm('Are you sure you want to cancel this reservation?')) return;
+    
+    try {
+        const { error } = await supabaseClient
+            .from('reservations')
+            .update({ status: 'cancelled' })
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        const reservation = reservations.find(r => r.id === id);
+        if (reservation) {
+            reservation.status = 'cancelled';
+            const table = tables.find(t => t.number === reservation.table_number);
+            if (table) table.status = 'free';
+        }
+        
+        renderReservations();
+        alert('Reservation cancelled!');
+    } catch (error) {
+        console.error('❌ Error cancelling reservation:', error);
+        alert('Error: ' + error.message);
+    }
+}
+
+async function renderOrders() {
+    if (!hasPermission('viewTableOrders')) {
+        document.getElementById('ordersList').innerHTML = '<p class="text-gray-500 text-center py-8">You do not have permission to view orders.</p>';
+        return;
+    }
+    
+    try {
+        const { data: ordersData, error } = await supabaseClient
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        orders = ordersData || [];
+        
+        const search = document.getElementById('orderSearch')?.value.toLowerCase() || '';
+        let html = '';
+        
+        orders.forEach(order => {
+            if (search && !order.table_number.toString().includes(search) && 
+                !(order.customer_name && order.customer_name.toLowerCase().includes(search))) return;
+            
+            let items = [];
+            try {
+                items = JSON.parse(order.items || '[]');
+            } catch (e) {
+                console.error('Error parsing order items:', e);
+            }
+                
+            html += `
+                <div class="bg-white p-4 rounded-xl shadow">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold">Table ${order.table_number} • ${order.customer_name || 'Guest'}</h3>
+                            <p class="text-gray-600 text-sm">${order.order_number || ''}</p>
+                        </div>
+                        <span class="px-3 py-1 ${order.status === 'completed' ? 'bg-green-100 text-green-700' : order.status === 'preparing' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'} rounded">
+                            ${order.status}
+                        </span>
+                    </div>
+                    <div class="border-t pt-4">
+                        ${items.map(item => `
+                            <div class="flex justify-between mb-2">
+                                <span>${item.name} × ${item.quantity}</span>
+                                <span>₹${item.price * item.quantity}</span>
+                            </div>
+                        `).join('')}
+                        <div class="flex justify-between font-bold border-t pt-2 mt-2">
+                            <span>Total</span>
+                            <span>₹${order.total || 0}</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        ${order.status === 'preparing' ? `<button onclick="updateOrderStatus('${order.id}', 'completed')" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Mark Completed</button>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        document.getElementById('ordersList').innerHTML = html || '<p class="text-gray-500 text-center py-8">No orders found</p>';
+    } catch (error) {
+        console.error('❌ Error loading orders:', error);
+        document.getElementById('ordersList').innerHTML = '<p class="text-red-500">Error loading orders</p>';
+    }
+}
+
+async function updateOrderStatus(id, status) {
+    try {
+        const { error } = await supabaseClient
+            .from('orders')
+            .update({ status: status })
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        const order = orders.find(o => o.id === id);
+        if (order) order.status = status;
+        
+        renderOrders();
+        alert(`Order marked as ${status}!`);
+    } catch (error) {
+        console.error('❌ Error updating order:', error);
+        alert('Error: ' + error.message);
+    }
+}
+
+async function renderHistory() {
+    try {
+        const { data: ordersData, error } = await supabaseClient
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        orders = ordersData || [];
+        
+        let html = '';
+        const search = document.getElementById('historySearch')?.value.toLowerCase() || '';
+        
+        if (historyFilter === 'table') {
+            if (!hasPermission('viewOrderHistoryTable')) {
+                document.getElementById('historyList').innerHTML = '<p class="text-gray-500 text-center py-8">You do not have permission to view table history.</p>';
+                return;
+            }
+            
+            document.getElementById('btnTable')?.classList.add('bg-blue-600', 'text-white');
+            document.getElementById('btnTable')?.classList.remove('bg-gray-300');
+            document.getElementById('btnName')?.classList.remove('bg-blue-600', 'text-white');
+            document.getElementById('btnName')?.classList.add('bg-gray-300');
+            
+            const tableGroups = {};
+            orders.forEach(order => {
+                if (search && !order.table_number.toString().includes(search)) return;
+                if (!tableGroups[order.table_number]) tableGroups[order.table_number] = [];
+                tableGroups[order.table_number].push(order);
+            });
+            
+            for (const [tableNumber, tableOrders] of Object.entries(tableGroups)) {
+                const total = tableOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+                html += `
+                    <div class="bg-white p-4 rounded-xl shadow">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg">Table ${tableNumber}</h3>
+                            <span class="font-bold">₹${total}</span>
+                        </div>
+                        ${tableOrders.map(order => `
+                            <div class="border-l-2 border-blue-500 pl-3 mb-3">
+                                <div class="flex justify-between">
+                                    <span class="font-medium">${order.order_number || 'Order'}</span>
+                                    <span>₹${order.total || 0}</span>
+                                </div>
+                                <p class="text-gray-600 text-sm">${order.created_at ? new Date(order.created_at).toLocaleDateString() : ''} • ${order.customer_name || 'Guest'}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        } else {
+            if (!hasPermission('viewOrderHistoryName')) {
+                document.getElementById('historyList').innerHTML = '<p class="text-gray-500 text-center py-8">You do not have permission to view name history.</p>';
+                return;
+            }
+            
+            document.getElementById('btnName')?.classList.add('bg-blue-600', 'text-white');
+            document.getElementById('btnName')?.classList.remove('bg-gray-300');
+            document.getElementById('btnTable')?.classList.remove('bg-blue-600', 'text-white');
+            document.getElementById('btnTable')?.classList.add('bg-gray-300');
+            
+            const nameGroups = {};
+            orders.forEach(order => {
+                const customerName = order.customer_name || 'Guest';
+                if (search && !customerName.toLowerCase().includes(search)) return;
+                if (!nameGroups[customerName]) nameGroups[customerName] = [];
+                nameGroups[customerName].push(order);
+            });
+            
+            for (const [customerName, customerOrders] of Object.entries(nameGroups)) {
+                const total = customerOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+                html += `
+                    <div class="bg-white p-4 rounded-xl shadow">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg">${customerName}</h3>
+                            <span class="font-bold">₹${total}</span>
+                        </div>
+                        ${customerOrders.map(order => `
+                            <div class="border-l-2 border-green-500 pl-3 mb-3">
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Table ${order.table_number}</span>
+                                    <span>₹${order.total || 0}</span>
+                                </div>
+                                <p class="text-gray-600 text-sm">${order.created_at ? new Date(order.created_at).toLocaleDateString() : ''} • ${order.order_number || 'Order'}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
+        
+        document.getElementById('historyList').innerHTML = html || '<p class="text-gray-500 text-center py-8">No orders found</p>';
+    } catch (error) {
+        console.error('❌ Error loading history:', error);
+        document.getElementById('historyList').innerHTML = '<p class="text-red-500">Error loading history</p>';
+    }
+}
+
+// Initialize image gallery on load
+window.addEventListener('load', async () => {
+    // Initialize the application
+    await init();
+    
+    // Load images from Supabase
+    await loadImagesFromSupabase();
+    renderDefaultImages();
+});
+</script>
+</body>
+</html>
