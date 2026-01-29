@@ -529,39 +529,16 @@ try {
 }
 
 // FIXED (Fast menu display):
+// Change the init() function order:
 async function init() {
-    try {
-        console.log('🚀 Initializing application...');
-        
-        // 1. Get restaurant from URL FAST
-        const pathParts = window.location.pathname.split('/');
-        const restaurantSlug = pathParts[pathParts.length - 1];
-        
-        // 2. Load menu dishes FIRST (FAST)
-        const { data: dishesData, error } = await supabaseClient
-            .from('dishes')
-            .select('*')
-            .eq('is_active', true);
-        
-        if (!error) {
-            dishes = dishesData || [];
-            renderCustomerMenu();  // SHOW MENU IMMEDIATELY!
-        }
-        
-        // 3. Check auth in BACKGROUND (non-blocking)
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (user) {
-            console.log('✓ User already logged in:', user.email);
-            await handleSession(user);
-        }
-        
-        // 4. Load other data in background
-        loadOtherData();
-        
-    } catch (error) {
-        console.error('❌ Initialization error:', error);
-        // Still show menu even if error
-        renderCustomerMenu();
+    // 1. FIRST load and show menu (non-blocking)
+    await loadInitialData();
+    renderCustomerMenu();  // SHOW MENU IMMEDIATELY
+    
+    // 2. THEN check login status (in background)
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+        await handleSession(user);
     }
 }
 
@@ -1953,4 +1930,5 @@ window.addEventListener('load', async () => {
 </script>
 </body>
 </html>
+
 
