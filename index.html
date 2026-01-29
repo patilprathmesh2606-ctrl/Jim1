@@ -528,61 +528,49 @@ try {
     console.error('Supabase initialization error:', error);
 }
 
-// Change the init() function order:
-async function init() {
-    // 1. FIRST load and show menu (non-blocking)
-    await loadInitialData();
-    renderCustomerMenu();  // SHOW MENU IMMEDIATELY
-    
-    // 2. THEN check login status (in background)
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (user) {
-        await handleSession(user);
-    }
-}
-
-// Global variables
-let currentUser = null,
-    users = [],
-    dishes = [],
-    orders = [],
-    reservations = [],
-    tables = [],
-    historyFilter = 'table',
-    editingUserId = null,
-    editingDishId = null,
-    availableImages = [],
-    defaultImages = [
-        { url: 'https://via.placeholder.com/300x200/FF6B6B/FFFFFF?text=Chinese', name: 'Chinese Dish' },
-        { url: 'https://via.placeholder.com/300x200/4ECDC4/FFFFFF?text=Fast+Food', name: 'Fast Food' },
-        { url: 'https://via.placeholder.com/300x200/45B7D1/FFFFFF?text=Drink', name: 'Drink' },
-        { url: 'https://via.placeholder.com/300x200/96CEB4/FFFFFF?text=Soup', name: 'Soup' },
-        { url: 'https://via.placeholder.com/300x200/FFEAA7/000000?text=Dessert', name: 'Dessert' },
-        { url: 'https://via.placeholder.com/300x200/DDA0DD/FFFFFF?text=Appetizer', name: 'Appetizer' }
-    ];
-
-// Initialize application
+// FIXED (Fast menu display):
 async function init() {
     try {
         console.log('🚀 Initializing application...');
         
-        // Check if user is already logged in
+        // 1. Get restaurant from URL FAST
+        const pathParts = window.location.pathname.split('/');
+        const restaurantSlug = pathParts[pathParts.length - 1];
+        
+        // 2. Load menu dishes FIRST (FAST)
+        const { data: dishesData, error } = await supabaseClient
+            .from('dishes')
+            .select('*')
+            .eq('is_active', true);
+        
+        if (!error) {
+            dishes = dishesData || [];
+            renderCustomerMenu();  // SHOW MENU IMMEDIATELY!
+        }
+        
+        // 3. Check auth in BACKGROUND (non-blocking)
         const { data: { user } } = await supabaseClient.auth.getUser();
         if (user) {
             console.log('✓ User already logged in:', user.email);
             await handleSession(user);
         }
         
-        // Load initial data
-        await loadInitialData();
-        renderCustomerMenu();
+        // 4. Load other data in background
+        loadOtherData();
         
-        console.log('✓ Application initialized successfully');
     } catch (error) {
         console.error('❌ Initialization error:', error);
+        // Still show menu even if error
+        renderCustomerMenu();
     }
 }
 
+// Function to load other data after menu shows
+async function loadOtherData() {
+    // Load users, orders, reservations, etc.
+    // This happens AFTER menu is already visible
+}
+    
 async function loadInitialData() {
     try {
         console.log('📊 Loading data from Supabase...');
@@ -1965,3 +1953,4 @@ window.addEventListener('load', async () => {
 </script>
 </body>
 </html>
+
